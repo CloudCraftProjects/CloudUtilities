@@ -1,4 +1,4 @@
-package tk.booky.customconnector;
+package tk.booky.cloudutilities;
 // Created by booky10 in CustomConnector (14:54 19.06.21)
 
 import com.google.inject.Inject;
@@ -27,8 +27,8 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-@Plugin(id = "customconnector", name = "CustomConnector", version = "1.0.1", authors = "booky10")
-public class CustomConnectorVelocityMain {
+@Plugin(id = "cloudutilities", name = "CloudUtilities", version = "1.1.1", authors = "booky10")
+public class CloudUtilitiesMain {
 
     public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.forDefaultNamespace("brand");
     public static final byte[] MESSAGE = StringSerializer.fromString("youtu.be/dQw4w9WgXcQ");

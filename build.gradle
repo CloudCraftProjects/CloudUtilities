@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'tk.booky'
-version = '1.1.0'
+version = '1.1.1'
 
 repositories {
     maven { url = 'https://nexus.velocitypowered.com/repository/maven-public/' }
