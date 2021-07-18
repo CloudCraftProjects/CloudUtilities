@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'tk.booky'
-version = '1.0.0'
+version = '1.0.1'
 
 repositories {
     maven { url = 'https://repo.destroystokyo.com/repository/maven-public/' }
@@ -14,6 +14,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'io.github.waterfallmc:waterfall-api:1.17-R0.1-SNAPSHOT'
 }
 
 processResources {
