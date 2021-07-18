@@ -27,7 +27,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-@Plugin(id = "cloudutilities", name = "CloudUtilities", version = "1.1.1", authors = "booky10")
+@Plugin(id = "cloudutilities", name = "CloudUtilities", version = "@version@", authors = "booky10")
 public class CloudUtilitiesMain {
 
     public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.forDefaultNamespace("brand");
