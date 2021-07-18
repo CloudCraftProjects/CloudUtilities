@@ -6,15 +6,14 @@ plugins {
 }
 
 group = 'tk.booky'
-version = '1.0.2'
+version = '1.1.0'
 
 repositories {
-    maven { url = 'https://repo.destroystokyo.com/repository/maven-public/' }
     maven { url = 'https://nexus.velocitypowered.com/repository/maven-public/' }
 }
 
 dependencies {
-    implementation 'io.github.waterfallmc:waterfall-api:1.17-R0.1-SNAPSHOT'
+    implementation 'io.netty:netty-buffer:4.1.58.Final'
 
     implementation 'com.velocitypowered:velocity-api:3.0.0'
     annotationProcessor 'com.velocitypowered:velocity-api:3.0.0'

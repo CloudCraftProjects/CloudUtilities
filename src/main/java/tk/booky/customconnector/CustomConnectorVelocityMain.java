@@ -31,7 +31,7 @@ import java.util.List;
 public class CustomConnectorVelocityMain {
 
     public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.forDefaultNamespace("brand");
-    public static final byte[] MESSAGE = new PacketSerializer("youtu.be/dQw4w9WgXcQ").toArray();
+    public static final byte[] MESSAGE = StringSerializer.fromString("youtu.be/dQw4w9WgXcQ");
 
     @Inject @SuppressWarnings("unused") private ProxyServer server;
     @Inject @SuppressWarnings("unused") private Logger logger;

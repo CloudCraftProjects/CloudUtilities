@@ -1,3 +1,0 @@
-name: CustomConnector
-version: @version@
-main: tk.booky.customconnector.CustomConnectorBungeeMain
