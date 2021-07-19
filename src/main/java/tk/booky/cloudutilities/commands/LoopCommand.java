@@ -47,9 +47,15 @@ public class LoopCommand {
             () -> server.getCommandManager().executeImmediatelyAsync(sender, command);
 
         Runnable runnable = () -> {
-            execute.run();
+            boolean cancelTask = timesRan.incrementAndGet() >= times;
 
-            if (timesRan.incrementAndGet() >= times) {
+            try {
+                execute.run();
+            } catch (IllegalStateException exception) {
+                cancelTask = true;
+            }
+
+            if (cancelTask) {
                 ScheduledTask current = task.get();
                 if (current != null) {
                     current.cancel();
