@@ -43,7 +43,7 @@ public class LoopCommand {
         AtomicInteger timesRan = new AtomicInteger(0);
 
         Runnable execute = sender instanceof Player ?
-            () -> ((Player) sender).spoofChatInput('/' + command) :
+            () -> ((Player) sender).spoofChatInput(command) :
             () -> server.getCommandManager().executeImmediatelyAsync(sender, command);
 
         Runnable runnable = () -> {
