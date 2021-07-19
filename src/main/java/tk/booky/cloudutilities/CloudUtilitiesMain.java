@@ -9,6 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 import tk.booky.cloudutilities.arguments.PlayerArgumentType;
 import tk.booky.cloudutilities.commands.ConnectCommand;
+import tk.booky.cloudutilities.commands.LoopCommand;
 import tk.booky.cloudutilities.commands.PingCommand;
 import tk.booky.cloudutilities.listener.ConnectListener;
 import tk.booky.cloudutilities.listener.PingListener;
@@ -25,6 +26,7 @@ public class CloudUtilitiesMain {
         PlayerArgumentType.server = server;
 
         // Registering commands
+        server.getCommandManager().register(LoopCommand.create(this, server));
         server.getCommandManager().register(ConnectCommand.create(server));
         server.getCommandManager().register(PingCommand.create());
 
