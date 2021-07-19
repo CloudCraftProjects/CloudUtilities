@@ -25,6 +25,7 @@ public class ConnectCommand {
         return new BrigadierCommand(
             LiteralArgumentBuilder.<CommandSource>
                 literal("connect")
+                .requires(source -> source.hasPermission("cu.command.connect"))
                 .then(RequiredArgumentBuilder.<CommandSource, String>
                     argument("host", StringArgumentType.word())
                     .then(RequiredArgumentBuilder.<CommandSource, Integer>
