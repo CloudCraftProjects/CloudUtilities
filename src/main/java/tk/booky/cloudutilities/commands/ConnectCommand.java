@@ -14,7 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import tk.booky.cloudutilities.arguments.PlayerArgumentType;
+import tk.booky.cloudutilities.parser.PlayerArgumentParser;
 import tk.booky.cloudutilities.utils.Constants;
 
 import java.net.InetSocketAddress;
@@ -32,9 +32,9 @@ public class ConnectCommand {
                         .requires(source -> source instanceof Player && source.hasPermission("cu.command.connect"))
                         .executes(context -> execute(server, context.getSource(), (Player) context.getSource(), StringArgumentType.getString(context, "host"), IntegerArgumentType.getInteger(context, "port")))
                         .then(RequiredArgumentBuilder.<CommandSource, String>
-                            argument("target", PlayerArgumentType.player())
+                            argument("target", StringArgumentType.word())
                             .requires(source -> source.hasPermission("cu.command.connect"))
-                            .executes(context -> execute(server, context.getSource(), PlayerArgumentType.getPlayer(context, "target"), StringArgumentType.getString(context, "host"), IntegerArgumentType.getInteger(context, "port")))
+                            .executes(context -> execute(server, context.getSource(), PlayerArgumentParser.getPlayer(context, "target"), StringArgumentType.getString(context, "host"), IntegerArgumentType.getInteger(context, "port")))
                         )
                     )
                 )

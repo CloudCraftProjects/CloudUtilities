@@ -1,6 +1,7 @@
 package tk.booky.cloudutilities.commands;
 // Created by booky10 in CloudUtilities (14:21 18.07.21)
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,7 +10,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import tk.booky.cloudutilities.arguments.PlayerArgumentType;
+import tk.booky.cloudutilities.parser.PlayerArgumentParser;
 import tk.booky.cloudutilities.utils.Constants;
 
 public class PingCommand {
@@ -20,8 +21,8 @@ public class PingCommand {
                 literal("ping")
                 .then(
                     RequiredArgumentBuilder.<CommandSource, String>
-                        argument("target", PlayerArgumentType.player())
-                        .executes(context -> execute(context.getSource(), PlayerArgumentType.getPlayer(context, "target")))
+                        argument("target", StringArgumentType.word())
+                        .executes(context -> execute(context.getSource(), PlayerArgumentParser.getPlayer(context, "target")))
                 )
                 .requires(source -> source instanceof Player)
                 .executes(context -> execute(context.getSource(), (Player) context.getSource()))
