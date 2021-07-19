@@ -48,7 +48,6 @@ public class ConnectCommand {
 
             sender.sendMessage(
                 Constants.PREFIX
-                    .append(Component.space())
                     .append(Component.text(target.getUsername(), NamedTextColor.WHITE))
                     .append(Component.text(" will be sent to ", NamedTextColor.GREEN))
                     .append(Component.text(address.toString(), NamedTextColor.WHITE))

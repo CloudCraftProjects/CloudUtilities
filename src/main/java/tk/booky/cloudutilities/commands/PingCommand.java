@@ -34,7 +34,6 @@ public class PingCommand {
         } else {
             sender.sendMessage(
                 Constants.PREFIX
-                    .append(Component.space())
                     .append(Component.text("Player ", NamedTextColor.GREEN))
                     .append(Component.text(target.getUsername(), NamedTextColor.WHITE))
                     .append(Component.text(" has a ping of ", NamedTextColor.GREEN))

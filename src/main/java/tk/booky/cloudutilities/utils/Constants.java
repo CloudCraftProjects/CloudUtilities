@@ -22,5 +22,6 @@ public class Constants {
         .append(Component.text('C', NamedTextColor.WHITE, TextDecoration.BOLD))
         .append(Component.text('U', NamedTextColor.AQUA, TextDecoration.BOLD))
         .append(Component.text(']', NamedTextColor.GRAY))
+        .append(Component.space())
         .build();
 }
