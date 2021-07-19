@@ -1,4 +1,4 @@
-package tk.booky.cloudutilities;
+package tk.booky.cloudutilities.utils;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
