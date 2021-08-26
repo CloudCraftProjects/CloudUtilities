@@ -10,7 +10,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import tk.booky.cloudutilities.parser.PlayerArgumentParser;
+import tk.booky.cloudutilities.utils.PlayerArgumentParser;
 import tk.booky.cloudutilities.utils.Constants;
 
 public class PingCommand {

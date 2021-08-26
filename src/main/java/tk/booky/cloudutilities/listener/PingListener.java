@@ -5,13 +5,10 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.proxy.server.ServerPing.SamplePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static tk.booky.cloudutilities.utils.Constants.VERSION;
 
 public class PingListener {
 
@@ -43,11 +40,6 @@ public class PingListener {
             }
         }
 
-        event.setPing(
-            event.getPing().asBuilder()
-                .samplePlayers(players)
-                .version(new ServerPing.Version(event.getPing().getVersion().getProtocol(), VERSION))
-                .build()
-        );
+        event.setPing(event.getPing().asBuilder().samplePlayers(players).build());
     }
 }

@@ -7,12 +7,11 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
-import tk.booky.cloudutilities.parser.PlayerArgumentParser;
 import tk.booky.cloudutilities.commands.ConnectCommand;
 import tk.booky.cloudutilities.commands.LoopCommand;
 import tk.booky.cloudutilities.commands.PingCommand;
-import tk.booky.cloudutilities.listener.ConnectListener;
 import tk.booky.cloudutilities.listener.PingListener;
+import tk.booky.cloudutilities.utils.PlayerArgumentParser;
 
 @Plugin(id = "cloudutilities", name = "CloudUtilities", version = "@version@", authors = "booky10")
 public class CloudUtilitiesMain {
@@ -32,6 +31,5 @@ public class CloudUtilitiesMain {
 
         // Registering listeners
         server.getEventManager().register(this, new PingListener(server));
-        server.getEventManager().register(this, new ConnectListener());
     }
 }

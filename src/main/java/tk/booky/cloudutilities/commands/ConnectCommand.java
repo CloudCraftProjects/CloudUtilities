@@ -14,7 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import tk.booky.cloudutilities.parser.PlayerArgumentParser;
+import tk.booky.cloudutilities.utils.PlayerArgumentParser;
 import tk.booky.cloudutilities.utils.Constants;
 
 import java.net.InetSocketAddress;

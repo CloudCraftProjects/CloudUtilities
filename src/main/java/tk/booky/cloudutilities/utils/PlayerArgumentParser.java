@@ -1,4 +1,4 @@
-package tk.booky.cloudutilities.parser;
+package tk.booky.cloudutilities.utils;
 // Created by booky10 in CloudUtilities (14:24 18.07.21)
 
 import com.mojang.brigadier.arguments.StringArgumentType;
