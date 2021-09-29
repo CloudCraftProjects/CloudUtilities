@@ -3,8 +3,6 @@ package tk.booky.cloudutilities.commands;
 
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -18,24 +16,18 @@ import tk.booky.cloudutilities.utils.Constants;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static tk.booky.cloudutilities.utils.Constants.argument;
+import static tk.booky.cloudutilities.utils.Constants.literal;
+
 public class LoopCommand {
 
     public static BrigadierCommand create(Object plugin, ProxyServer server) {
-        return new BrigadierCommand(
-            LiteralArgumentBuilder.<CommandSource>
-                literal("loop")
-                .requires(source -> source.hasPermission("cu.command.loop"))
-                .then(RequiredArgumentBuilder.<CommandSource, Long>
-                    argument("times", LongArgumentType.longArg(1))
-                    .then(RequiredArgumentBuilder.<CommandSource, Long>
-                        argument("interval", LongArgumentType.longArg(1))
-                        .then(RequiredArgumentBuilder.<CommandSource, String>
-                            argument("command", StringArgumentType.greedyString())
-                            .executes(context -> execute(plugin, server, context.getSource(), LongArgumentType.getLong(context, "times"), LongArgumentType.getLong(context, "interval"), StringArgumentType.getString(context, "command")))
-                        )
-                    )
-                )
-        );
+        return new BrigadierCommand(literal("loop")
+            .requires(source -> source.hasPermission("cu.command.loop"))
+            .then(argument("times", LongArgumentType.longArg(1))
+                .then(argument("interval", LongArgumentType.longArg(1))
+                    .then(argument("command", StringArgumentType.greedyString())
+                        .executes(context -> execute(plugin, server, context.getSource(), LongArgumentType.getLong(context, "times"), LongArgumentType.getLong(context, "interval"), StringArgumentType.getString(context, "command")))))));
     }
 
     private static int execute(Object plugin, ProxyServer server, CommandSource sender, long times, long interval, String command) {

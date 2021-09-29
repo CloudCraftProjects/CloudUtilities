@@ -2,31 +2,26 @@ package tk.booky.cloudutilities.commands;
 // Created by booky10 in CloudUtilities (14:21 18.07.21)
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import tk.booky.cloudutilities.utils.PlayerArgumentParser;
 import tk.booky.cloudutilities.utils.Constants;
+import tk.booky.cloudutilities.utils.PlayerArgumentParser;
+
+import static tk.booky.cloudutilities.utils.Constants.argument;
+import static tk.booky.cloudutilities.utils.Constants.literal;
 
 public class PingCommand {
 
     public static BrigadierCommand create() {
-        return new BrigadierCommand(
-            LiteralArgumentBuilder.<CommandSource>
-                literal("ping")
-                .then(
-                    RequiredArgumentBuilder.<CommandSource, String>
-                        argument("target", StringArgumentType.word())
-                        .executes(context -> execute(context.getSource(), PlayerArgumentParser.getPlayer(context, "target")))
-                )
-                .requires(source -> source instanceof Player)
-                .executes(context -> execute(context.getSource(), (Player) context.getSource()))
-        );
+        return new BrigadierCommand(literal("ping")
+            .then(argument("target", StringArgumentType.word())
+                .executes(context -> execute(context.getSource(), PlayerArgumentParser.getPlayer(context, "target"))))
+            .requires(source -> source instanceof Player)
+            .executes(context -> execute(context.getSource(), (Player) context.getSource())));
     }
 
     private static int execute(CommandSource sender, Player target) throws CommandSyntaxException {
