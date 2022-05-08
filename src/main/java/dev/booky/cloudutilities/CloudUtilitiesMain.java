@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
+import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
@@ -15,6 +16,7 @@ import dev.booky.cloudutilities.commands.LobbyCommand;
 import dev.booky.cloudutilities.commands.LoopCommand;
 import dev.booky.cloudutilities.commands.PingCommand;
 import dev.booky.cloudutilities.listener.JoinListener;
+import dev.booky.cloudutilities.listener.PingListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -72,6 +74,16 @@ public class CloudUtilitiesMain {
             for (Player player : server.getAllPlayers()) {
                 listener.onJoin(new PostLoginEvent(player));
             }
+        }
+
+        ProtocolVersion first = ProtocolVersion.getProtocolVersion(config.getNode("ping", "first-supported").getInt(-1));
+        ProtocolVersion last = ProtocolVersion.getProtocolVersion(config.getNode("ping", "last-supported").getInt(-1));
+        if (first.isUnknown() && !last.isUnknown()) {
+            server.getEventManager().register(this, new PingListener(last, last));
+        } else if (!first.isUnknown() && last.isUnknown()) {
+            server.getEventManager().register(this, new PingListener(first, first));
+        } else if (!first.isUnknown()) {
+            server.getEventManager().register(this, new PingListener(first, last));
         }
     }
 }
