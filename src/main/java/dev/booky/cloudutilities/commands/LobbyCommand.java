@@ -5,6 +5,7 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.booky.cloudutilities.util.Utilities;
 
@@ -32,7 +33,12 @@ public class LobbyCommand {
     private static int execute(ProxyServer server, CommandSource source, Player target) {
         RegisteredServer lobby = server.getServer("lobby").orElseGet(() -> server.getServer("hub").orElse(null));
         if (lobby == null) {
-            source.sendMessage(Utilities.PREFIX.append(text("No lobby/hub server found", RED)));
+            source.sendMessage(Utilities.PREFIX.append(text("No lobby server found", RED)));
+            return 1;
+        }
+
+        if (lobby.getServerInfo().equals(target.getCurrentServer().map(ServerConnection::getServerInfo).orElse(null))) {
+            source.sendMessage(Utilities.PREFIX.append(text("You are already in the lobby", RED)));
             return 1;
         }
 
