@@ -3,7 +3,6 @@ package dev.booky.cloudutilities;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
@@ -15,23 +14,23 @@ import dev.booky.cloudutilities.commands.ConnectCommand;
 import dev.booky.cloudutilities.commands.LobbyCommand;
 import dev.booky.cloudutilities.commands.LoopCommand;
 import dev.booky.cloudutilities.commands.PingCommand;
-import dev.booky.cloudutilities.listener.JoinListener;
 import dev.booky.cloudutilities.listener.PingListener;
+import dev.booky.cloudutilities.listener.TablistListener;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Plugin(
-    id = "cloudutilities",
-    name = "CloudUtilities",
-    version = "${version}",
-    authors = "booky10"
+        id = "cloudutilities",
+        name = "CloudUtilities",
+        version = "${version}",
+        authors = "booky10"
 )
 public class CloudUtilitiesMain {
 
@@ -41,49 +40,52 @@ public class CloudUtilitiesMain {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
-        server.getCommandManager().register(LoopCommand.create(this, server));
-        server.getCommandManager().register(ConnectCommand.create(server));
-        server.getCommandManager().register(PingCommand.create(server));
+        this.server.getCommandManager().register(LoopCommand.create(this, this.server));
+        this.server.getCommandManager().register(ConnectCommand.create(this.server));
+        this.server.getCommandManager().register(PingCommand.create(this.server));
 
-        server.getCommandManager().register("lobby", LobbyCommand.create(server),
-            "hub", "l", "h", "leave", "quit", "exit");
+        this.server.getCommandManager().register("lobby", LobbyCommand.create(this.server),
+                "hub", "l", "h", "leave", "quit", "exit");
 
-        onProxyReload(null);
+        this.reload();
     }
 
-    @Subscribe
-    public void onProxyReload(ProxyReloadEvent event) throws IOException {
-        server.getEventManager().unregisterListeners(this);
+    private void reload() throws IOException {
+        this.server.getEventManager().unregisterListeners(this);
 
-        dataDirectory.toFile().mkdirs();
-        File configFile = new File(dataDirectory.toFile(), "config.yml");
-        if (!configFile.exists()) configFile.createNewFile();
+        this.server.getEventManager().register(this, ProxyReloadEvent.class, handler -> {
+            try {
+                this.reload();
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+
+        Path configPath = this.dataDirectory.resolve("config.yml");
+        Files.createDirectories(configPath.getParent());
+        if (!Files.exists(configPath)) {
+            Files.createFile(configPath);
+        }
 
         ConfigurationNode config = YAMLConfigurationLoader.builder()
-            .setPath(dataDirectory.resolve("config.yml"))
-            .build().load();
+                .setPath(configPath).build().load();
 
-        GsonComponentSerializer gson = GsonComponentSerializer.gson();
-        Component header = gson.deserialize(config.getNode("tablist", "header").getString("{\"text\":\"\"}"));
-        Component footer = gson.deserialize(config.getNode("tablist", "footer").getString("{\"text\":\"\"}"));
+        Component header = MiniMessage.miniMessage().deserializeOr(
+                config.getNode("tablist", "header").getString(), Component.empty());
+        Component footer = MiniMessage.miniMessage().deserializeOr(
+                config.getNode("tablist", "footer").getString(), Component.empty());
 
-        if (!header.equals(Component.empty()) || !footer.equals(Component.empty())) {
-            JoinListener listener = new JoinListener(header, footer);
-            server.getEventManager().register(this, listener);
+        TablistListener listener = new TablistListener(header, footer);
+        this.server.getEventManager().register(this, listener);
 
-            for (Player player : server.getAllPlayers()) {
-                listener.onJoin(new PostLoginEvent(player));
-            }
+        for (Player player : this.server.getAllPlayers()) {
+            listener.onUpdate(player);
         }
 
-        ProtocolVersion first = ProtocolVersion.getProtocolVersion(config.getNode("ping", "first-supported").getInt(-1));
-        ProtocolVersion last = ProtocolVersion.getProtocolVersion(config.getNode("ping", "last-supported").getInt(-1));
-        if (first.isUnknown() && !last.isUnknown()) {
-            server.getEventManager().register(this, new PingListener(last, last));
-        } else if (!first.isUnknown() && last.isUnknown()) {
-            server.getEventManager().register(this, new PingListener(first, first));
-        } else if (!first.isUnknown()) {
-            server.getEventManager().register(this, new PingListener(first, last));
-        }
+        ProtocolVersion first = ProtocolVersion.getProtocolVersion(config
+                .getNode("ping", "first-supported").getInt(-1));
+        ProtocolVersion last = ProtocolVersion.getProtocolVersion(config
+                .getNode("ping", "last-supported").getInt(-1));
+        this.server.getEventManager().register(this, new PingListener(first, last));
     }
 }

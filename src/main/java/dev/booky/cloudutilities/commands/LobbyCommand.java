@@ -22,16 +22,17 @@ public class LobbyCommand {
 
     public static BrigadierCommand create(ProxyServer server) {
         return new BrigadierCommand(literal("lobby")
-            .then(argument("target", word())
-                .suggests(suggestPlayer(server, "target"))
-                .requires(source -> source.hasPermission("cu.command.lobby.other"))
-                .executes(context -> execute(server, context.getSource(), getPlayer(server, context, "target"))))
-            .requires(source -> source instanceof Player && source.hasPermission("cu.command.lobby"))
-            .executes(context -> execute(server, context.getSource(), (Player) context.getSource())));
+                .then(argument("target", word())
+                        .suggests(suggestPlayer(server, "target"))
+                        .requires(source -> source.hasPermission("cu.command.lobby.other"))
+                        .executes(context -> execute(server, context.getSource(), getPlayer(server, context, "target"))))
+                .requires(source -> source instanceof Player && source.hasPermission("cu.command.lobby"))
+                .executes(context -> execute(server, context.getSource(), (Player) context.getSource())));
     }
 
     private static int execute(ProxyServer server, CommandSource source, Player target) {
-        RegisteredServer lobby = server.getServer("lobby").orElseGet(() -> server.getServer("hub").orElse(null));
+        RegisteredServer lobby = server.getServer("lobby")
+                .orElseGet(() -> server.getServer("hub").orElse(null));
         if (lobby == null) {
             source.sendMessage(Utilities.PREFIX.append(text("No lobby server found", RED)));
             return 1;

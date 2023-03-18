@@ -10,7 +10,7 @@ import dev.booky.cloudutilities.util.Utilities;
 import net.kyori.adventure.util.Ticks;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
@@ -25,38 +25,38 @@ public class LoopCommand {
 
     public static BrigadierCommand create(Object plugin, ProxyServer server) {
         return new BrigadierCommand(literal("loop")
-            .requires(source -> source.hasPermission("cu.command.loop"))
-            .then(argument("times", longArg(1))
-                .then(argument("interval", longArg(1))
-                    .then(argument("command", greedyString())
-                        .executes(context -> execute(plugin, server, context.getSource(), getLong(context, "times"), getLong(context, "interval"), getString(context, "command")))))));
+                .requires(source -> source.hasPermission("cu.command.loop"))
+                .then(argument("times", longArg(1))
+                        .then(argument("interval", longArg(1))
+                                .then(argument("command", greedyString())
+                                        .executes(context -> execute(plugin, server, context.getSource(),
+                                                getLong(context, "times"),
+                                                getLong(context, "interval"),
+                                                getString(context, "command")))))));
     }
 
-    private static int execute(Object plugin, ProxyServer server, CommandSource sender, long times, long interval, String command) {
-        AtomicReference<ScheduledTask> task = new AtomicReference<>();
+    private static int execute(Object plugin, ProxyServer server, CommandSource sender,
+                               long times, long interval, String command) {
         AtomicInteger timesRan = new AtomicInteger(0);
-
-        Runnable fallbackExecute = sender instanceof Player ?
-            () -> ((Player) sender).spoofChatInput(command) : null;
-
-        Runnable runnable = () -> {
-            boolean cancelTask = timesRan.incrementAndGet() >= times;
-
+        Consumer<ScheduledTask> runnable = task -> {
             try {
-                boolean success = server.getCommandManager().executeImmediatelyAsync(sender, command).join();
-                if (!success && fallbackExecute != null) fallbackExecute.run();
+                boolean success = server.getCommandManager().executeAsync(sender, command).join();
+                if (!success && sender instanceof Player) {
+                    ((Player) sender).spoofChatInput(command);
+                }
             } catch (Throwable exception) {
-                if (!cancelTask) cancelTask = true;
+                exception.printStackTrace();
+                task.cancel();
+                return;
             }
 
-            if (!cancelTask) return;
-            ScheduledTask current = task.get();
-            if (current != null) {
-                current.cancel();
+            if (timesRan.incrementAndGet() >= times
+                    || (sender instanceof Player && !((Player) sender).isActive())) {
+                task.cancel();
             }
         };
 
-        task.set(server.getScheduler().buildTask(plugin, runnable).repeat(Ticks.duration(interval)).schedule());
+        server.getScheduler().buildTask(plugin, runnable).repeat(Ticks.duration(interval)).schedule();
         sender.sendMessage(Utilities.PREFIX.append(text("The task has been scheduled", GREEN)));
 
         return 1;

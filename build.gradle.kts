@@ -4,40 +4,45 @@ plugins {
 }
 
 group = "dev.booky"
-version = "1.3.0"
+version = "1.3.1"
 
 repositories {
-    maven("https://papermc.io/repo/repository/maven-public/")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
-    api("io.netty:netty-buffer:4.1.76.Final")
+    api("io.netty:netty-buffer:4.1.89.Final")
 
-    api("com.velocitypowered:velocity-api:3.0.1")
-    annotationProcessor("com.velocitypowered:velocity-api:3.0.1")
+    val velocityVersion = "3.2.0-SNAPSHOT"
+    api("com.velocitypowered:velocity-api:$velocityVersion")
+    annotationProcessor("com.velocitypowered:velocity-api:$velocityVersion")
 }
 
-task("processSources", Sync::class) {
-    from(sourceSets.main.get().java.srcDirs)
-    inputs.property("version", version)
+tasks {
+    val processSources = register("processSources", Sync::class) {
+        from(sourceSets.main.get().java.srcDirs)
 
-    filter { return@filter it.replace("\${version}", project.version as String) }
-    into("$buildDir/src")
-}
+        inputs.property("version", project.version)
+        filesNotMatching("") { // go over every file
+            expand("version" to project.version)
+        }
 
-tasks.withType<JavaCompile> {
-    dependsOn(tasks["processSources"])
-    source = fileTree("$buildDir/src")
+        into("$buildDir/src")
+    }
+
+    withType<JavaCompile> {
+        dependsOn(processSources)
+        source = fileTree(processSources.get().destinationDir)
+    }
 }
 
 java {
     withSourcesJar()
-    withJavadocJar()
 }
 
 publishing {
     publications.create<MavenPublication>("maven") {
-        artifactId = project.name.toLowerCase()
+        artifactId = project.name.lowercase()
         from(components["java"])
     }
 }

@@ -8,26 +8,28 @@ import com.velocitypowered.api.proxy.server.ServerPing;
 
 public record PingListener(ProtocolVersion first, ProtocolVersion last) {
 
+    private static final String SOFTWARE_NAME = System.getProperty("cloudutilities.software-name", "Velocity") + " ";
+
     @Subscribe
     public void onPing(ProxyPingEvent event) {
-        String versionRange = "Velocity ";
-        if (first != last || first.getVersionsSupportedBy().size() > 0) {
-            versionRange += first.getVersionIntroducedIn() + " - " + last.getMostRecentSupportedVersion();
-        } else {
-            versionRange += first.getVersionIntroducedIn();
+        ProtocolVersion playerVer = event.getConnection().getProtocolVersion();
+
+        int protocol = -1;
+        if (playerVer.compareTo(this.first) >= 0 && playerVer.compareTo(this.last) <= 0) {
+            protocol = playerVer.getProtocol(); // valid version
         }
 
-        int protocol;
-        if (first.compareTo(event.getConnection().getProtocolVersion()) > 0) { // Too old
-            protocol = -1;
-        } else if (last.compareTo(event.getConnection().getProtocolVersion()) < 0) { // Too new
-            protocol = -1;
-        } else {
-            protocol = event.getConnection().getProtocolVersion().getProtocol();
-        }
+        String versionName = SOFTWARE_NAME + this.getVersionRange();
+        event.setPing(event.getPing().asBuilder()
+                .version(new ServerPing.Version(protocol, versionName))
+                .build());
+    }
 
-        ServerPing.Builder ping = event.getPing().asBuilder();
-        ping.version(new ServerPing.Version(protocol, versionRange));
-        event.setPing(ping.build());
+    private String getVersionRange() {
+        StringBuilder version = new StringBuilder(this.first.getVersionIntroducedIn());
+        if (this.first != this.last || this.first.getVersionsSupportedBy().size() > 1) {
+            version.append('-').append(this.last.getMostRecentSupportedVersion());
+        }
+        return version.toString();
     }
 }

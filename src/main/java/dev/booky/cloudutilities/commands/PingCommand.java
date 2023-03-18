@@ -25,12 +25,12 @@ public class PingCommand {
 
     public static BrigadierCommand create(ProxyServer server) {
         return new BrigadierCommand(literal("ping")
-            .then(argument("target", word())
-                .requires(source -> source.hasPermission("cu.command.ping.other"))
-                .suggests(ArgumentUtil.suggestPlayer(server, "target"))
-                .executes(context -> execute(context.getSource(), ArgumentUtil.getPlayer(server, context, "target"))))
-            .requires(source -> source instanceof Player && source.hasPermission("cu.command.ping"))
-            .executes(context -> execute(context.getSource(), (Player) context.getSource())));
+                .then(argument("target", word())
+                        .requires(source -> source.hasPermission("cu.command.ping.other"))
+                        .suggests(ArgumentUtil.suggestPlayer(server, "target"))
+                        .executes(context -> execute(context.getSource(), ArgumentUtil.getPlayer(server, context, "target"))))
+                .requires(source -> source instanceof Player && source.hasPermission("cu.command.ping"))
+                .executes(context -> execute(context.getSource(), (Player) context.getSource())));
     }
 
     private static int execute(CommandSource sender, Player target) throws CommandSyntaxException {
@@ -39,13 +39,12 @@ public class PingCommand {
         }
 
         sender.sendMessage(Component.text()
-            .color(GREEN).append(Utilities.PREFIX)
-
-            .append(Component.text("Player "))
-            .append(Component.text(target.getUsername(), WHITE))
-            .append(Component.text(" has a ping of "))
-            .append(Component.text(target.getPing(), getPingColor(target.getPing())))
-            .append(Component.text("ms")));
+                .color(GREEN).append(Utilities.PREFIX)
+                .append(Component.text("Player "))
+                .append(Component.text(target.getUsername(), WHITE))
+                .append(Component.text(" has a ping of "))
+                .append(Component.text(target.getPing(), getPingColor(target.getPing())))
+                .append(Component.text("ms")));
         return 1;
     }
 

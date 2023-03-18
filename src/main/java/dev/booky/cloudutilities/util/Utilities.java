@@ -14,15 +14,18 @@ import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 
-public class Utilities {
+public final class Utilities {
 
     public static final Component PREFIX = text()
-        .append(text('[', GRAY))
-        .append(text('C', WHITE, BOLD))
-        .append(text('U', AQUA, BOLD))
-        .append(text(']', GRAY))
-        .append(space())
-        .build();
+            .append(text('[', GRAY))
+            .append(text('C', WHITE, BOLD))
+            .append(text('U', AQUA, BOLD))
+            .append(text(']', GRAY))
+            .append(space())
+            .build();
+
+    private Utilities() {
+    }
 
     public static LiteralArgumentBuilder<CommandSource> literal(String name) {
         return LiteralArgumentBuilder.literal(name);
