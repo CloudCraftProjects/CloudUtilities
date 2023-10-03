@@ -27,7 +27,7 @@ tasks {
             expand("version" to project.version)
         }
 
-        into("$buildDir/src")
+        into(layout.buildDirectory.dir("src"))
     }
 
     withType<JavaCompile> {
@@ -38,6 +38,10 @@ tasks {
 
 java {
     withSourcesJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
 }
 
 publishing {
