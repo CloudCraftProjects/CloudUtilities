@@ -3,7 +3,7 @@ package dev.booky.cloudutilities.listener;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
 
@@ -15,7 +15,7 @@ public record TablistListener(Component header, Component footer) {
     }
 
     @Subscribe
-    public void onServerSwitch(ServerConnectedEvent event) {
+    public void onServerSwitch(ServerPostConnectEvent event) {
         this.onUpdate(event.getPlayer());
     }
 
