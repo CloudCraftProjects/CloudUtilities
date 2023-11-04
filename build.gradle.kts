@@ -1,19 +1,22 @@
 plugins {
     id("java-library")
     id("maven-publish")
+
+    id("xyz.jpenilla.run-velocity") version "2.2.0"
 }
 
 group = "dev.booky"
-version = "1.3.1"
+version = "1.4.0"
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
+val velocityVersion = "3.2.0-SNAPSHOT"
+
 dependencies {
     api("io.netty:netty-buffer:4.1.89.Final")
 
-    val velocityVersion = "3.2.0-SNAPSHOT"
     api("com.velocitypowered:velocity-api:$velocityVersion")
     annotationProcessor("com.velocitypowered:velocity-api:$velocityVersion")
 }
@@ -33,6 +36,10 @@ tasks {
     withType<JavaCompile> {
         dependsOn(processSources)
         source = fileTree(processSources.get().destinationDir)
+    }
+
+    runVelocity {
+        velocityVersion(velocityVersion)
     }
 }
 

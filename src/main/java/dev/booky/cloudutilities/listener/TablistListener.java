@@ -4,22 +4,23 @@ package dev.booky.cloudutilities.listener;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.text.Component;
+import dev.booky.cloudutilities.util.TablistUpdater;
 
-public record TablistListener(Component header, Component footer) {
+public final class TablistListener {
+
+    private final TablistUpdater updater;
+
+    public TablistListener(TablistUpdater updater) {
+        this.updater = updater;
+    }
 
     @Subscribe
     public void onJoin(PostLoginEvent event) {
-        this.onUpdate(event.getPlayer());
+        this.updater.updateTablist(event.getPlayer());
     }
 
     @Subscribe
     public void onServerSwitch(ServerPostConnectEvent event) {
-        this.onUpdate(event.getPlayer());
-    }
-
-    public void onUpdate(Player player) {
-        player.sendPlayerListHeaderAndFooter(this.header, this.footer);
+        this.updater.updateTablist(event.getPlayer());
     }
 }
