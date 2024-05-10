@@ -4,7 +4,6 @@ package dev.booky.cloudutilities;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
-import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
@@ -15,23 +14,19 @@ import dev.booky.cloudutilities.commands.ConnectCommand;
 import dev.booky.cloudutilities.commands.LobbyCommand;
 import dev.booky.cloudutilities.commands.LoopCommand;
 import dev.booky.cloudutilities.commands.PingCommand;
+import dev.booky.cloudutilities.config.CloudUtilsConfig;
 import dev.booky.cloudutilities.listener.PingListener;
 import dev.booky.cloudutilities.listener.TablistListener;
 import dev.booky.cloudutilities.util.BuildConstants;
 import dev.booky.cloudutilities.util.TablistUpdater;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+
+import static dev.booky.cloudutilities.config.CloudUtilsConfig.CONFIGURATE_LOADER;
 
 @Plugin(
         id = "cloudutilities",
@@ -54,15 +49,6 @@ public class CloudUtilitiesMain {
         this.dataDirectory = dataDirectory;
     }
 
-    private static List<Component> getComponents(ConfigurationNode node) {
-        try {
-            return node.getList(String.class, List::of)
-                    .stream().map(MiniMessage.miniMessage()::deserialize).toList();
-        } catch (SerializationException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
         this.server.getCommandManager().register(LoopCommand.create(this, this.server));
@@ -78,52 +64,38 @@ public class CloudUtilitiesMain {
     private synchronized void reload() throws IOException {
         this.server.getEventManager().unregisterListeners(this);
 
-        this.server.getEventManager().register(this, ProxyReloadEvent.class, handler -> {
-            try {
-                this.reload();
-            } catch (IOException exception) {
-                throw new RuntimeException(exception);
-            }
-        });
+        this.server.getEventManager().register(this,
+                ProxyReloadEvent.class, handler -> {
+                    try {
+                        this.reload();
+                    } catch (IOException exception) {
+                        throw new RuntimeException(exception);
+                    }
+                });
 
         Path configPath = this.dataDirectory.resolve("config.yml");
-        Files.createDirectories(configPath.getParent());
-        if (!Files.exists(configPath)) {
-            Files.createFile(configPath);
+        CloudUtilsConfig config = CONFIGURATE_LOADER.loadObject(configPath, CloudUtilsConfig.class);
+
+        if (this.tablistTask != null) {
+            this.tablistTask.cancel();
+            this.tablistTask = null;
         }
 
-        ConfigurationNode config = YamlConfigurationLoader.builder()
-                .path(configPath).build().load();
+        if (!config.getTablist().isEmpty()) {
+            TablistUpdater updater = new TablistUpdater(this.server, config.getTablist());
+            this.tablistTask = updater.start(this);
 
-        {
-            if (this.tablistTask != null) {
-                this.tablistTask.cancel();
-                this.tablistTask = null;
-            }
+            TablistListener listener = new TablistListener(updater);
+            this.server.getEventManager().register(this, listener);
 
-            List<Component> headers = getComponents(config.node("tablist", "headers"));
-            List<Component> footers = getComponents(config.node("tablist", "footers"));
-            int updateInterval = config.node("tablist", "update-interval").getInt(40);
-
-            if (!headers.isEmpty() || !footers.isEmpty()) {
-                TablistUpdater updater = new TablistUpdater(this.server, updateInterval, headers, footers);
-                this.tablistTask = updater.start(this);
-
-                TablistListener listener = new TablistListener(updater);
-                this.server.getEventManager().register(this, listener);
-
-                for (Player player : this.server.getAllPlayers()) {
-                    updater.updateTablist(player);
-                }
+            for (Player player : this.server.getAllPlayers()) {
+                updater.updateTablist(player);
             }
         }
 
-        {
-            ProtocolVersion first = ProtocolVersion.getProtocolVersion(config
-                    .node("ping", "first-supported").getInt(-1));
-            ProtocolVersion last = ProtocolVersion.getProtocolVersion(config
-                    .node("ping", "last-supported").getInt(-1));
-            this.server.getEventManager().register(this, new PingListener(first, last));
+        if (!config.getPing().isDisabled()) {
+            PingListener listener = new PingListener(config.getPing());
+            this.server.getEventManager().register(this, listener);
         }
     }
 }
