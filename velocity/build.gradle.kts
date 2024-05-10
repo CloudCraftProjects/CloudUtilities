@@ -1,19 +1,15 @@
 plugins {
-    id("xyz.jpenilla.run-velocity") version "2.3.0"
+    alias(libs.plugins.runtask.velocity)
 }
 
-val velocityVersion = "3.2.0-SNAPSHOT"
-
 dependencies {
-    api("io.netty:netty-buffer:4.1.89.Final")
-
-    api("com.velocitypowered:velocity-api:$velocityVersion")
-    annotationProcessor("com.velocitypowered:velocity-api:$velocityVersion")
+    compileOnly(libs.velocity.api)
+    annotationProcessor(libs.velocity.api)
 }
 
 tasks {
     val processSources = register("processSources", Sync::class) {
-        from(sourceSets.main.get().java.srcDirs)
+        from(sourceSets.main.map { it.java.srcDirs }.get())
 
         inputs.property("version", project.version)
         filesNotMatching("") { // go over every file
@@ -25,10 +21,10 @@ tasks {
 
     withType<JavaCompile> {
         dependsOn(processSources)
-        source = fileTree(processSources.get().destinationDir)
+        source = fileTree(processSources.map { it.destinationDir }.get())
     }
 
     runVelocity {
-        velocityVersion(velocityVersion)
+        velocityVersion(libs.versions.velocity.get())
     }
 }
