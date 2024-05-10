@@ -31,9 +31,18 @@ subprojects {
             artifactId = "${rootProject.name}-${project.name}".lowercase()
             from(components["java"])
         }
+        repositories.maven("https://repo.cloudcraftmc.de/releases") {
+            name = "horreo"
+            credentials(PasswordCredentials::class)
+        }
     }
 
     tasks {
+        withType<JavaCompile> {
+            options.encoding = Charsets.UTF_8.name()
+            options.release = 17
+        }
+
         withType<Jar> {
             destinationDirectory = rootProject.tasks.jar.map { it.destinationDirectory }.get()
         }
