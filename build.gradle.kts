@@ -32,4 +32,10 @@ subprojects {
             from(components["java"])
         }
     }
+
+    tasks {
+        withType<Jar> {
+            destinationDirectory = rootProject.tasks.jar.map { it.destinationDirectory }.get()
+        }
+    }
 }
