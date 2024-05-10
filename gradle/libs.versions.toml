@@ -2,7 +2,7 @@
 runtask = "2.3.0"
 
 # velocity subproject
-velocity = "3.2.0-SNAPSHOT"
+velocity = "3.3.0-SNAPSHOT"
 
 [plugins]
 runtask-velocity = { id = "xyz.jpenilla.run-velocity", version.ref = "runtask" }

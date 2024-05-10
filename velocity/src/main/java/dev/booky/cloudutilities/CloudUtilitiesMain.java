@@ -1,7 +1,6 @@
 package dev.booky.cloudutilities;
 // Created by booky10 in CustomConnector (14:54 19.06.21)
 
-import com.google.common.reflect.TypeToken;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
@@ -22,10 +21,10 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,11 +53,9 @@ public class CloudUtilitiesMain {
 
     private static List<Component> getComponents(ConfigurationNode node) {
         try {
-            return node.getList(new TypeToken<String>() {})
-                    .stream()
-                    .map(MiniMessage.miniMessage()::deserialize)
-                    .toList();
-        } catch (ObjectMappingException exception) {
+            return node.getList(String.class, List::of)
+                    .stream().map(MiniMessage.miniMessage()::deserialize).toList();
+        } catch (SerializationException exception) {
             throw new RuntimeException(exception);
         }
     }
@@ -92,8 +89,8 @@ public class CloudUtilitiesMain {
             Files.createFile(configPath);
         }
 
-        ConfigurationNode config = YAMLConfigurationLoader.builder()
-                .setPath(configPath).build().load();
+        ConfigurationNode config = YamlConfigurationLoader.builder()
+                .path(configPath).build().load();
 
         {
             if (this.tablistTask != null) {
@@ -101,9 +98,9 @@ public class CloudUtilitiesMain {
                 this.tablistTask = null;
             }
 
-            List<Component> headers = getComponents(config.getNode("tablist", "headers"));
-            List<Component> footers = getComponents(config.getNode("tablist", "footers"));
-            int updateInterval = config.getNode("tablist", "update-interval").getInt(40);
+            List<Component> headers = getComponents(config.node("tablist", "headers"));
+            List<Component> footers = getComponents(config.node("tablist", "footers"));
+            int updateInterval = config.node("tablist", "update-interval").getInt(40);
 
             if (!headers.isEmpty() || !footers.isEmpty()) {
                 TablistUpdater updater = new TablistUpdater(this.server, updateInterval, headers, footers);
@@ -120,9 +117,9 @@ public class CloudUtilitiesMain {
 
         {
             ProtocolVersion first = ProtocolVersion.getProtocolVersion(config
-                    .getNode("ping", "first-supported").getInt(-1));
+                    .node("ping", "first-supported").getInt(-1));
             ProtocolVersion last = ProtocolVersion.getProtocolVersion(config
-                    .getNode("ping", "last-supported").getInt(-1));
+                    .node("ping", "last-supported").getInt(-1));
             this.server.getEventManager().register(this, new PingListener(first, last));
         }
     }
