@@ -1,10 +1,12 @@
 plugins {
-    alias(libs.plugins.runtask.velocity)
+    alias(libs.plugins.run.velocity)
 }
 
 dependencies {
     compileOnly(libs.velocity.api)
     annotationProcessor(libs.velocity.api)
+
+    compileOnly(libs.cloudcore.velocity)
 }
 
 tasks {

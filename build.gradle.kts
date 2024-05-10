@@ -10,6 +10,11 @@ allprojects {
     version = "1.4.0"
 
     repositories {
+        mavenLocal {
+            content {
+                includeModuleByRegex("dev\\.booky", "cloudcore.*")
+            }
+        }
         maven("https://repo.cloudcraftmc.de/public/")
     }
 }
