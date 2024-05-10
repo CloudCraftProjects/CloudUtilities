@@ -17,6 +17,7 @@ import dev.booky.cloudutilities.commands.LoopCommand;
 import dev.booky.cloudutilities.commands.PingCommand;
 import dev.booky.cloudutilities.listener.PingListener;
 import dev.booky.cloudutilities.listener.TablistListener;
+import dev.booky.cloudutilities.util.BuildConstants;
 import dev.booky.cloudutilities.util.TablistUpdater;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -35,9 +36,9 @@ import java.util.List;
 @Plugin(
         id = "cloudutilities",
         name = "CloudUtilities",
-        version = "${version}",
+        version = BuildConstants.PLUGIN_VERSION,
         authors = "booky10",
-        dependencies = @Dependency(id = "CloudCore")
+        dependencies = @Dependency(id = "cloudcore")
 )
 @Singleton
 public class CloudUtilitiesMain {

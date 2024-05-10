@@ -1,0 +1,10 @@
+package dev.booky.cloudutilities.util;
+// Created by booky10 in CloudCore (15:02 10.05.2024.)
+
+public final class BuildConstants {
+
+    public static final String PLUGIN_VERSION = "{{ version }}";
+
+    private BuildConstants() {
+    }
+}
