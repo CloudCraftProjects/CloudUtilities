@@ -19,6 +19,7 @@ public class PvPListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDamage(EntityDamageEvent event) {
         if (event.getDamageSource().getCausingEntity() instanceof Player
+                && event.getEntity() instanceof Player
                 && !this.manager.getConfig().isAllowPvP()) {
             event.setCancelled(true);
         }
