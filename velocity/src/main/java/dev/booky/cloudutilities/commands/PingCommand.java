@@ -50,7 +50,8 @@ public class PingCommand extends AbstractCommand {
         long ping = target.getPing();
         PingLevel pingLevel = PingLevel.determine(ping);
 
-        sender.sendMessage(translatable("cu.command.ping",
+        sender.sendMessage(translatable(sender == target
+                        ? "cu.command.ping.self" : "cu.command.ping.other",
                 text(target.getUsername()),
                 text(ping, pingLevel.getColor())));
         return 1;
