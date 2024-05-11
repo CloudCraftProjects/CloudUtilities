@@ -4,8 +4,10 @@ package dev.booky.cloudutilities.bukkit;
 import dev.booky.cloudcore.i18n.CloudTranslator;
 import dev.booky.cloudutilities.bukkit.commands.AbstractCommand;
 import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
+import dev.booky.cloudutilities.bukkit.listener.PvPListener;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -43,6 +45,9 @@ public class CloudUtilitiesMain extends JavaPlugin {
         for (AbstractCommand command : this.commands) {
             command.register(this);
         }
+
+        PluginManager plugins = Bukkit.getPluginManager();
+        plugins.registerEvents(new PvPListener(this.manager), this);
     }
 
     @Override
