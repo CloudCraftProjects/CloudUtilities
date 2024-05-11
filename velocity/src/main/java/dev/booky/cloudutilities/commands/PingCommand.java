@@ -1,19 +1,21 @@
 package dev.booky.cloudutilities.commands;
 // Created by booky10 in CloudUtilities (14:21 18.07.21)
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.velocitypowered.api.command.BrigadierCommand;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import dev.booky.cloudutilities.util.ArgumentUtil;
 import dev.booky.cloudutilities.util.Utilities;
-import net.kyori.adventure.text.Component;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import net.kyori.adventure.text.format.TextColor;
 
+import java.util.function.LongPredicate;
+
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static dev.booky.cloudutilities.util.Utilities.argument;
-import static dev.booky.cloudutilities.util.Utilities.literal;
+import static dev.booky.cloudutilities.util.ArgumentUtil.getPlayer;
+import static dev.booky.cloudutilities.util.ArgumentUtil.suggestPlayer;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
@@ -21,38 +23,76 @@ import static net.kyori.adventure.text.format.NamedTextColor.RED;
 import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 import static net.kyori.adventure.text.format.NamedTextColor.YELLOW;
 
-public class PingCommand {
+@Singleton
+public class PingCommand extends AbstractCommand {
 
-    public static BrigadierCommand create(ProxyServer server) {
-        return new BrigadierCommand(literal("ping")
-                .then(argument("target", word())
-                        .requires(source -> source.hasPermission("cu.command.ping.other"))
-                        .suggests(ArgumentUtil.suggestPlayer(server, "target"))
-                        .executes(context -> execute(context.getSource(), ArgumentUtil.getPlayer(server, context, "target"))))
-                .requires(source -> source instanceof Player && source.hasPermission("cu.command.ping"))
-                .executes(context -> execute(context.getSource(), (Player) context.getSource())));
+    private final ProxyServer server;
+
+    @Inject
+    public PingCommand(ProxyServer server) {
+        super("ping", "latency");
+        this.server = server;
     }
 
-    private static int execute(CommandSource sender, Player target) throws CommandSyntaxException {
-        if (target == null) {
-            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
-        }
+    @Override
+    public LiteralCommandNode<CommandSource> buildNode() {
+        return literal(this.getLabel())
+                .requires(source -> source.hasPermission(this.getPermission()))
+                .executes(ctx -> this.sendPing(ctx.getSource(), (Player) ctx.getSource()))
+                .then(argument("target", word())
+                        .requires(source -> source.hasPermission(this.getPermission("other")))
+                        .suggests(suggestPlayer(this.server, "target"))
+                        .executes(ctx -> this.sendPing(ctx.getSource(),
+                                getPlayer(this.server, ctx, "target"))))
+                .build();
+    }
 
-        sender.sendMessage(Component.text()
+    public int sendPing(CommandSource sender, Player target) {
+        long ping = target.getPing();
+        PingLevel pingLevel = PingLevel.determine(ping);
+
+        sender.sendMessage(text()
                 .color(GREEN).append(Utilities.PREFIX)
-                .append(Component.text("Player "))
-                .append(Component.text(target.getUsername(), WHITE))
-                .append(Component.text(" has a ping of "))
-                .append(Component.text(target.getPing(), getPingColor(target.getPing())))
-                .append(Component.text("ms")));
+                .append(text("Player "))
+                .append(text(target.getUsername(), WHITE))
+                .append(text(" has a ping of "))
+                .append(text(ping, pingLevel.getColor()))
+                .append(text("ms")));
         return 1;
     }
 
-    private static TextColor getPingColor(long ping) {
-        if (ping < 50) return GREEN;
-        if (ping < 100) return YELLOW;
-        if (ping < 150) return GOLD;
-        if (ping < 200) return RED;
-        return DARK_RED;
+    private enum PingLevel implements LongPredicate {
+
+        GOOD(50, GREEN),
+        MEDIUM(100, YELLOW),
+        BAD(150, GOLD),
+        VERY_BAD(200, RED),
+        WTF(Integer.MAX_VALUE, DARK_RED);
+
+        private final int maxPing;
+        private final TextColor color;
+
+        PingLevel(int maxPing, TextColor color) {
+            this.maxPing = maxPing;
+            this.color = color;
+        }
+
+        public static PingLevel determine(long ping) {
+            for (PingLevel level : values()) {
+                if (level.test(ping)) {
+                    return level;
+                }
+            }
+            return WTF;
+        }
+
+        @Override
+        public boolean test(long value) {
+            return value <= this.maxPing;
+        }
+
+        public TextColor getColor() {
+            return this.color;
+        }
     }
 }

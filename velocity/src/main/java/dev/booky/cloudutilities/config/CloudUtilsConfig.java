@@ -72,6 +72,8 @@ public class CloudUtilsConfig {
         }
     }
 
+    private String lobbyServer = "lobby";
+
     private CloudUtilsConfig() {
     }
 
@@ -81,5 +83,9 @@ public class CloudUtilsConfig {
 
     public PingConfig getPing() {
         return this.ping;
+    }
+
+    public String getLobbyServer() {
+        return this.lobbyServer;
     }
 }
