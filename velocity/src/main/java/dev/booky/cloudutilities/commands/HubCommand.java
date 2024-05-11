@@ -8,7 +8,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.booky.cloudutilities.CloudUtilitiesMain;
-import dev.booky.cloudutilities.util.Utilities;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -16,8 +15,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.booky.cloudutilities.util.PlayerArguments.getPlayer;
 import static dev.booky.cloudutilities.util.PlayerArguments.playerSuggestions;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
+import static net.kyori.adventure.text.Component.translatable;
 
 @Singleton
 public class HubCommand extends AbstractCommand {
@@ -54,12 +52,15 @@ public class HubCommand extends AbstractCommand {
                 .map(ServerConnection::getServer)
                 .orElse(null);
         if (lobby.equals(currentServer)) {
-            source.sendMessage(Utilities.PREFIX.append(text("You are already in the lobby", RED)));
+            source.sendMessage(translatable(source == target ?
+                    "cu.command.hub.already-connected.self" : "cu.command.hub.already-connected.other"));
             return 1;
         }
 
         target.createConnectionRequest(lobby).fireAndForget();
-        source.sendMessage(Utilities.PREFIX.append(text("Sent " + target.getUsername() + " to lobby", GREEN)));
+        source.sendMessage(translatable(source == target
+                        ? "cu.command.hub.success.self" : "cu.command.hub.success.other",
+                text(target.getUsername())));
         return 1;
     }
 }

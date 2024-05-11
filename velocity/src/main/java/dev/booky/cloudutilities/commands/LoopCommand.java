@@ -7,7 +7,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import dev.booky.cloudutilities.CloudUtilitiesMain;
-import dev.booky.cloudutilities.util.Utilities;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
@@ -20,8 +19,7 @@ import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
 import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.util.Ticks.duration;
 
 @Singleton
@@ -87,8 +85,7 @@ public class LoopCommand extends AbstractCommand {
                 .buildTask(this.plugin, runnable)
                 .repeat(duration(interval))
                 .schedule();
-        sender.sendMessage(Utilities.PREFIX.append(text("The task has been scheduled", GREEN)));
-
+        sender.sendMessage(translatable("cu.command.loop.success"));
         return 1;
     }
 }

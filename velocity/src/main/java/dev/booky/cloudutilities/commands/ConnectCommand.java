@@ -7,7 +7,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-import dev.booky.cloudutilities.util.Utilities;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -22,8 +21,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.booky.cloudutilities.util.PlayerArguments.getPlayer;
 import static dev.booky.cloudutilities.util.PlayerArguments.playerSuggestions;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
-import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
+import static net.kyori.adventure.text.Component.translatable;
 
 @Singleton
 public class ConnectCommand extends AbstractCommand {
@@ -76,10 +74,8 @@ public class ConnectCommand extends AbstractCommand {
 
     public int connectTo(CommandSource source, Player target, RegisteredServer server) {
         SocketAddress targetAddress = server.getServerInfo().getAddress();
-        source.sendMessage(Utilities.PREFIX
-                .append(text(target.getUsername(), WHITE))
-                .append(text(" will be sent to ", GREEN))
-                .append(text(targetAddress.toString(), WHITE)));
+        source.sendMessage(translatable(source == target ? "cu.command.connect.self" : "cu.command.connect.other",
+                text(target.getUsername()), text(targetAddress.toString())));
         target.createConnectionRequest(server).fireAndForget();
         return 1;
     }

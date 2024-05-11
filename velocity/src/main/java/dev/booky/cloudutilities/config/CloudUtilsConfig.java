@@ -25,6 +25,7 @@ public class CloudUtilsConfig {
 
         private List<Component> headers = List.of();
         private List<Component> footers = List.of();
+
         @Comment("Interval between switching header/footer lines in ticks")
         private int updateInterval = 40;
 
