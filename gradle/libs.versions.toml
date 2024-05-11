@@ -10,6 +10,8 @@ cloudcore = "1.1.0-SNAPSHOT"
 
 # paper
 paper = "1.20.6-R0.1-SNAPSHOT"
+commandapi = "9.4.1"
+debuggery = "1.5.1"
 
 # velocity
 velocity = "3.3.0-SNAPSHOT"
