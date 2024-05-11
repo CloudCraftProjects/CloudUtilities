@@ -13,8 +13,8 @@ import net.kyori.adventure.text.format.TextColor;
 import java.util.function.LongPredicate;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static dev.booky.cloudutilities.util.ArgumentUtil.getPlayer;
-import static dev.booky.cloudutilities.util.ArgumentUtil.suggestPlayer;
+import static dev.booky.cloudutilities.util.PlayerArguments.getPlayer;
+import static dev.booky.cloudutilities.util.PlayerArguments.playerSuggestions;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
@@ -41,7 +41,7 @@ public class PingCommand extends AbstractCommand {
                 .executes(ctx -> this.sendPing(ctx.getSource(), (Player) ctx.getSource()))
                 .then(argument("target", word())
                         .requires(source -> source.hasPermission(this.getPermission("other")))
-                        .suggests(suggestPlayer(this.server, "target"))
+                        .suggests(playerSuggestions(this.server))
                         .executes(ctx -> this.sendPing(ctx.getSource(),
                                 getPlayer(this.server, ctx, "target"))))
                 .build();

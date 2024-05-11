@@ -13,8 +13,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static dev.booky.cloudutilities.util.ArgumentUtil.getPlayer;
-import static dev.booky.cloudutilities.util.ArgumentUtil.suggestPlayer;
+import static dev.booky.cloudutilities.util.PlayerArguments.getPlayer;
+import static dev.booky.cloudutilities.util.PlayerArguments.playerSuggestions;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
@@ -39,7 +39,7 @@ public class HubCommand extends AbstractCommand {
                         && source.hasPermission(this.getPermission()))
                 .executes(ctx -> this.sendToHub(ctx.getSource(), (Player) ctx.getSource()))
                 .then(argument("target", word())
-                        .suggests(suggestPlayer(this.server, "target"))
+                        .suggests(playerSuggestions(this.server))
                         .requires(source -> source.hasPermission(this.getPermission("other")))
                         .executes(ctx -> this.sendToHub(ctx.getSource(),
                                 getPlayer(this.server, ctx, "target"))))

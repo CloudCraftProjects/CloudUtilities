@@ -19,8 +19,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static dev.booky.cloudutilities.util.ArgumentUtil.getPlayer;
-import static dev.booky.cloudutilities.util.ArgumentUtil.suggestPlayer;
+import static dev.booky.cloudutilities.util.PlayerArguments.getPlayer;
+import static dev.booky.cloudutilities.util.PlayerArguments.playerSuggestions;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
@@ -50,7 +50,7 @@ public class ConnectCommand extends AbstractCommand {
                                         getString(ctx, "host"),
                                         getInteger(ctx, "port")))
                                 .then(argument("target", word())
-                                        .suggests(suggestPlayer(this.server, "target"))
+                                        .suggests(playerSuggestions(this.server))
                                         .requires(source -> source.hasPermission(this.getPermission("other")))
                                         .executes(ctx -> this.connectTo(ctx.getSource(),
                                                 getPlayer(this.server, ctx, "target"),
