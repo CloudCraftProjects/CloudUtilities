@@ -4,6 +4,7 @@ package dev.booky.cloudutilities.bukkit;
 import dev.booky.cloudcore.i18n.CloudTranslator;
 import dev.booky.cloudutilities.bukkit.commands.AbstractCommand;
 import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
+import dev.booky.cloudutilities.bukkit.commands.FlyCommand;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -40,7 +41,8 @@ public class CloudUtilitiesMain extends JavaPlugin {
     @Override
     public void onEnable() {
         this.commands = List.of(
-                new AllowPvPCommand(this.manager)
+                new AllowPvPCommand(this.manager),
+                new FlyCommand()
         );
         for (AbstractCommand command : this.commands) {
             command.register(this);
