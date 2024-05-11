@@ -4,6 +4,7 @@ package dev.booky.cloudutilities.bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import static dev.booky.cloudutilities.bukkit.CloudUtilsConfig.CONFIGURATE_LOADER;
 
@@ -23,6 +24,11 @@ public class CloudUtilsManager {
 
     public void reloadConfig() {
         this.config = this.loadConfig();
+    }
+
+    public void updateConfig(Consumer<CloudUtilsConfig> updater) {
+        updater.accept(this.config);
+        this.saveConfig();
     }
 
     public void saveConfig() {

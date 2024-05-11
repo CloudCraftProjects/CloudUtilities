@@ -3,6 +3,7 @@ package dev.booky.cloudutilities.bukkit;
 
 import dev.booky.cloudcore.config.ConfigurateLoader;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
 public class CloudUtilsConfig {
@@ -11,6 +12,17 @@ public class CloudUtilsConfig {
             .withAllDefaultSerializers()
             .build();
 
+    @Setting("allow-pvp")
+    private boolean allowPvP = true;
+
     private CloudUtilsConfig() {
+    }
+
+    public boolean isAllowPvP() {
+        return this.allowPvP;
+    }
+
+    public void setAllowPvP(boolean allowPvP) {
+        this.allowPvP = allowPvP;
     }
 }
