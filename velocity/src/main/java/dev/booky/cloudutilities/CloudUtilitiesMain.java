@@ -11,6 +11,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import dev.booky.cloudcore.i18n.CloudTranslator;
 import dev.booky.cloudutilities.commands.AbstractCommand;
 import dev.booky.cloudutilities.commands.ConnectCommand;
 import dev.booky.cloudutilities.commands.HubCommand;
@@ -23,13 +24,16 @@ import dev.booky.cloudutilities.util.BuildConstants;
 import dev.booky.cloudutilities.util.TablistUpdater;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static dev.booky.cloudutilities.config.CloudUtilsConfig.CONFIGURATE_LOADER;
+import static net.kyori.adventure.key.Key.key;
 
 @Plugin(
         id = "cloudutilities",
@@ -44,6 +48,9 @@ public class CloudUtilitiesMain {
     private static final List<Class<? extends AbstractCommand>> COMMAND_CLASSES = List.of(
             ConnectCommand.class, HubCommand.class, LoopCommand.class, PingCommand.class
     );
+    private static final List<Locale> SUPPORTED_LOCALES = List.of(
+            Locale.ENGLISH, Locale.GERMAN
+    );
 
     private final Injector injector;
     private final ProxyServer server;
@@ -53,6 +60,7 @@ public class CloudUtilitiesMain {
 
     private final List<Object> registeredListeners = new ArrayList<>();
     private @Nullable ScheduledTask tablistTask;
+    private @Nullable CloudTranslator translator;
 
     @Inject
     public CloudUtilitiesMain(
@@ -93,6 +101,12 @@ public class CloudUtilitiesMain {
             this.tablistTask.cancel();
             this.tablistTask = null;
         }
+
+        // unload translator from registry
+        if (this.translator != null) {
+            this.translator.unload();
+            this.translator = null;
+        }
     }
 
     private synchronized void reload() {
@@ -101,6 +115,13 @@ public class CloudUtilitiesMain {
         // reload configuration
         this.reloadConfig();
 
+        // load and register translations
+        Key translatorName = key("cloudutilities", "i18n");
+        this.translator = new CloudTranslator(this.getClass().getClassLoader(),
+                translatorName, SUPPORTED_LOCALES);
+        this.translator.load();
+
+        // setup tablist, if not empty
         if (!this.config.getTablist().isEmpty()) {
             TablistUpdater updater = new TablistUpdater(this.server, this.config.getTablist());
             this.tablistTask = updater.start(this);
@@ -114,6 +135,7 @@ public class CloudUtilitiesMain {
             }
         }
 
+        // setup ping, if not useless
         if (!this.config.getPing().isDisabled()) {
             PingListener listener = new PingListener(this.config.getPing());
             this.server.getEventManager().register(this, listener);

@@ -17,12 +17,10 @@ import java.util.concurrent.CompletableFuture;
 import static com.mojang.brigadier.CommandDispatcher.ARGUMENT_SEPARATOR_CHAR;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.velocitypowered.api.command.VelocityBrigadierMessage.tooltip;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 public final class PlayerArguments {
-
-    private static final SimpleCommandExceptionType UNKNOWN_PLAYER_EXCEPTION = new SimpleCommandExceptionType(
-            tooltip(translatable("cu.error.unknown-player")));
 
     private PlayerArguments() {
     }
@@ -66,6 +64,8 @@ public final class PlayerArguments {
                     }
                 })
                 .or(() -> server.getPlayer(input))
-                .orElseThrow(UNKNOWN_PLAYER_EXCEPTION::create);
+                .orElseThrow(() -> new SimpleCommandExceptionType(
+                        tooltip(translatable("cu.error.unknown-player", text(input))))
+                        .create());
     }
 }

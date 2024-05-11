@@ -5,7 +5,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import dev.booky.cloudutilities.util.Utilities;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import net.kyori.adventure.text.format.TextColor;
@@ -16,11 +15,11 @@ import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static dev.booky.cloudutilities.util.PlayerArguments.getPlayer;
 import static dev.booky.cloudutilities.util.PlayerArguments.playerSuggestions;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
-import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 import static net.kyori.adventure.text.format.NamedTextColor.YELLOW;
 
 @Singleton
@@ -51,13 +50,9 @@ public class PingCommand extends AbstractCommand {
         long ping = target.getPing();
         PingLevel pingLevel = PingLevel.determine(ping);
 
-        sender.sendMessage(text()
-                .color(GREEN).append(Utilities.PREFIX)
-                .append(text("Player "))
-                .append(text(target.getUsername(), WHITE))
-                .append(text(" has a ping of "))
-                .append(text(ping, pingLevel.getColor()))
-                .append(text("ms")));
+        sender.sendMessage(translatable("cu.command.ping",
+                text(target.getUsername()),
+                text(ping, pingLevel.getColor())));
         return 1;
     }
 
