@@ -1,12 +1,16 @@
 package dev.booky.cloudutilities.bukkit;
 // Created by booky10 in CloudUtilities (04:01 11.05.2024.)
 
+import com.mojang.brigadier.tree.RootCommandNode;
 import dev.booky.cloudcore.i18n.CloudTranslator;
 import dev.booky.cloudutilities.bukkit.commands.AbstractCommand;
 import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
 import dev.booky.cloudutilities.bukkit.commands.FlyCommand;
+import dev.booky.cloudutilities.bukkit.commands.VanillaMsgCommand;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
 import dev.booky.cloudutilities.bukkit.listener.SleepListener;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Listener;
@@ -37,6 +41,11 @@ public class CloudUtilitiesMain extends JavaPlugin {
         this.manager = new CloudUtilsManager(this);
         Bukkit.getServicesManager().register(CloudUtilsManager.class,
                 this.manager, this, ServicePriority.Normal);
+
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            RootCommandNode<CommandSourceStack> root = event.registrar().getDispatcher().getRoot();
+            VanillaMsgCommand.inject(root, event.registrar());
+        });
     }
 
     @Override
