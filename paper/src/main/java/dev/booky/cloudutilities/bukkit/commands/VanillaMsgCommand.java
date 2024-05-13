@@ -39,11 +39,14 @@ public class VanillaMsgCommand extends AbstractCommand {
     private static final List<String> MINECRAFT_TELL_COMMANDS = TELL_COMMANDS.stream()
             .map(label -> NamespacedKey.MINECRAFT + ":" + label).toList();
 
+    private final ReplyCommand replyCommand;
+
     @Inject
-    public VanillaMsgCommand() {
+    public VanillaMsgCommand(ReplyCommand replyCommand) {
         super(TELL_COMMANDS.getFirst(),
                 TELL_COMMANDS.subList(1, TELL_COMMANDS.size())
                         .toArray(new String[0]));
+        this.replyCommand = replyCommand;
     }
 
     @Override
@@ -79,11 +82,11 @@ public class VanillaMsgCommand extends AbstractCommand {
         registrar.register(literal(mainLabel)
                 .then(argument("targets", players())
                         .then(argument("message", signedMessage())
-                                .executes(VanillaMsgCommand::execute)))
+                                .executes(this::execute)))
                 .build(), aliases);
     }
 
-    private static int execute(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private int execute(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         List<Player> targets = ctx.getArgument("targets", PlayerSelectorArgumentResolver.class)
                 .resolve(ctx.getSource());
         if (targets.isEmpty()) {
@@ -92,7 +95,7 @@ public class VanillaMsgCommand extends AbstractCommand {
 
         SignedMessageResolver messageResolver = ctx.getArgument("message", SignedMessageResolver.class);
         messageResolver.resolveSignedMessage("message", ctx)
-                .thenAccept(message -> sendMessage(ctx.getSource(), targets, message))
+                .thenAccept(message -> this.sendMessage(ctx.getSource(), targets, message))
                 .exceptionally(error -> {
                     LOGGER.error("Error while resolving signed chat message {} from {}",
                             messageResolver, ctx.getSource(), error);
@@ -101,7 +104,20 @@ public class VanillaMsgCommand extends AbstractCommand {
         return targets.size();
     }
 
-    private static void sendMessage(CommandSourceStack source, List<Player> targets, SignedMessage message) {
+    public void sendMessage(
+            CommandSourceStack source,
+            List<Player> targets,
+            SignedMessage message
+    ) {
+        this.sendMessage(source, targets, message, true);
+    }
+
+    public void sendMessage(
+            CommandSourceStack source,
+            List<Player> targets,
+            SignedMessage message,
+            boolean saveReplyTarget
+    ) {
         Component sourceName = source.getExecutor() != null
                 ? source.getExecutor().teamDisplayName()
                 : source.getSender().name();
@@ -111,6 +127,11 @@ public class VanillaMsgCommand extends AbstractCommand {
             ChatType.Bound outgoingChat = ChatType.MSG_COMMAND_OUTGOING.bind(sourceName, target.teamDisplayName());
             source.getSender().sendMessage(message, outgoingChat);
             target.sendMessage(message, incomingChat);
+
+            if (saveReplyTarget && source.getExecutor() instanceof Player player) {
+                this.replyCommand.setReplyTarget(player, target);
+                this.replyCommand.setReplyTarget(target, player);
+            }
         }
     }
 }
