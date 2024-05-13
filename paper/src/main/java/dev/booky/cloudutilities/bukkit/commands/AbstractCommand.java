@@ -1,26 +1,34 @@
 package dev.booky.cloudutilities.bukkit.commands;
 // Created by booky10 in CloudUtilities (04:13 11.05.2024.)
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandTree;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import net.kyori.adventure.text.Component;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
-import java.util.stream.Stream;
 
+import static io.papermc.paper.command.brigadier.MessageComponentSerializer.message;
+
+@ApiStatus.Internal
 public abstract class AbstractCommand {
 
     protected static final String COMMAND_PERMISSION_PREFIX = "cu.command.";
 
     private final String label;
     private final List<String> aliases;
-    private final List<String> allAliases;
 
     protected AbstractCommand(String label, String... aliases) {
         this.label = label;
         this.aliases = List.of(aliases);
-        this.allAliases = Stream.concat(Stream.of(label),
-                this.aliases.stream()).toList();
+    }
+
+    protected static CommandSyntaxException buildException(Component message) {
+        return new SimpleCommandExceptionType(message().serialize(message)).create();
     }
 
     public String getPermission() {
@@ -39,19 +47,10 @@ public abstract class AbstractCommand {
         return permBuilder.toString();
     }
 
-    protected abstract CommandTree buildTree();
+    protected abstract LiteralCommandNode<CommandSourceStack> buildNode();
 
-    public void unregister() {
-        for (String alias : this.allAliases) {
-            CommandAPI.unregister(alias, true);
-        }
-    }
-
-    public void register(JavaPlugin plugin) {
-        this.unregister(); // just to be safe
-        this.buildTree()
-                .withAliases(this.aliases.toArray(new String[0]))
-                .register(plugin);
+    public void register(Commands registrar, Plugin plugin) {
+        registrar.register(plugin.getPluginMeta(), this.buildNode(), null, this.aliases);
     }
 
     public String getLabel() {

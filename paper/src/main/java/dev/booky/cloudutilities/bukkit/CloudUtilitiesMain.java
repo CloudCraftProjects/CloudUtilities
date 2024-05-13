@@ -1,7 +1,6 @@
 package dev.booky.cloudutilities.bukkit;
 // Created by booky10 in CloudUtilities (04:01 11.05.2024.)
 
-import com.mojang.brigadier.tree.RootCommandNode;
 import dev.booky.cloudcore.i18n.CloudTranslator;
 import dev.booky.cloudutilities.bukkit.commands.AbstractCommand;
 import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
@@ -9,7 +8,6 @@ import dev.booky.cloudutilities.bukkit.commands.FlyCommand;
 import dev.booky.cloudutilities.bukkit.commands.VanillaMsgCommand;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
 import dev.booky.cloudutilities.bukkit.listener.SleepListener;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -29,7 +27,6 @@ public class CloudUtilitiesMain extends JavaPlugin {
 
     private @MonotonicNonNull CloudTranslator i18n;
     private @MonotonicNonNull CloudUtilsManager manager;
-    private @MonotonicNonNull List<AbstractCommand> commands;
 
     @Override
     public void onLoad() {
@@ -43,21 +40,19 @@ public class CloudUtilitiesMain extends JavaPlugin {
                 this.manager, this, ServicePriority.Normal);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
-            RootCommandNode<CommandSourceStack> root = event.registrar().getDispatcher().getRoot();
-            VanillaMsgCommand.inject(root, event.registrar());
+            List<AbstractCommand> commands = List.of(
+                    new AllowPvPCommand(this.manager),
+                    new FlyCommand(),
+                    new VanillaMsgCommand()
+            );
+            for (AbstractCommand command : commands) {
+                command.register(event.registrar(), this);
+            }
         });
     }
 
     @Override
     public void onEnable() {
-        this.commands = List.of(
-                new AllowPvPCommand(this.manager),
-                new FlyCommand()
-        );
-        for (AbstractCommand command : this.commands) {
-            command.register(this);
-        }
-
         List<Listener> listeners = List.of(
                 new PvPListener(this.manager),
                 new SleepListener(this.manager)
@@ -69,12 +64,6 @@ public class CloudUtilitiesMain extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (this.commands != null) {
-            for (AbstractCommand command : this.commands) {
-                command.unregister();
-            }
-            this.commands.clear();
-        }
         if (this.i18n != null) {
             this.i18n.unload();
         }

@@ -21,7 +21,6 @@ tasks {
         pluginJars.from(plugin.resolve())
 
         downloadPlugins {
-            hangar("CommandAPI", libs.versions.commandapi.get())
             github(
                 "PaperMC", "Debuggery",
                 "v${libs.versions.debuggery.get()}",
@@ -43,5 +42,5 @@ bukkit {
     apiVersion = "1.20.5"
     authors = listOf("booky10")
     website = "https://github.com/CloudCraftProjects/CloudUtilities"
-    depend = listOf("CloudCore", "CommandAPI")
+    depend = listOf("CloudCore")
 }

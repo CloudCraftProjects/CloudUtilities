@@ -4,6 +4,7 @@ package dev.booky.cloudutilities.bukkit.commands;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -14,13 +15,12 @@ import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.papermc.paper.command.brigadier.Commands.argument;
@@ -28,24 +28,33 @@ import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.players;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.signedMessage;
 
-public final class VanillaMsgCommand {
+public class VanillaMsgCommand extends AbstractCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("CloudUtilities");
 
-    private static final Set<String> TELL_COMMANDS = Set.of("msg", "tell", "w");
-    private static final Set<String> MINECRAFT_TELL_COMMANDS = TELL_COMMANDS.stream()
-            .map(label -> NamespacedKey.MINECRAFT + ":" + label)
-            .collect(Collectors.toUnmodifiableSet());
+    private static final List<String> TELL_COMMANDS = List.of("msg", "tell", "w");
+    private static final List<String> MINECRAFT_TELL_COMMANDS = TELL_COMMANDS.stream()
+            .map(label -> NamespacedKey.MINECRAFT + ":" + label).toList();
 
-    private VanillaMsgCommand() {
+    public VanillaMsgCommand() {
+        super(TELL_COMMANDS.getFirst(),
+                TELL_COMMANDS.subList(1, TELL_COMMANDS.size())
+                        .toArray(new String[0]));
     }
 
-    public static <S> void inject(RootCommandNode<S> root, Commands registrar) {
-        List<CommandNode<S>> namespacedNodes = MINECRAFT_TELL_COMMANDS.stream()
+    @Override
+    protected LiteralCommandNode<CommandSourceStack> buildNode() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void register(Commands registrar, Plugin plugin) {
+        RootCommandNode<CommandSourceStack> root = registrar.getDispatcher().getRoot();
+        List<CommandNode<CommandSourceStack>> namespacedNodes = MINECRAFT_TELL_COMMANDS.stream()
                 .map(root::getChild)
                 .filter(Objects::nonNull)
                 .toList();
-        List<CommandNode<S>> nodes = Stream.concat(namespacedNodes.stream(),
+        List<CommandNode<CommandSourceStack>> nodes = Stream.concat(namespacedNodes.stream(),
                         TELL_COMMANDS.stream()
                                 .map(root::getChild)
                                 .filter(Objects::nonNull)
