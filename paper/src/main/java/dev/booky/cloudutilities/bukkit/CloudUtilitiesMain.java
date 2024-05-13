@@ -6,9 +6,10 @@ import dev.booky.cloudutilities.bukkit.commands.AbstractCommand;
 import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
 import dev.booky.cloudutilities.bukkit.commands.FlyCommand;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
+import dev.booky.cloudutilities.bukkit.listener.SleepListener;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.PluginManager;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -48,8 +49,13 @@ public class CloudUtilitiesMain extends JavaPlugin {
             command.register(this);
         }
 
-        PluginManager plugins = Bukkit.getPluginManager();
-        plugins.registerEvents(new PvPListener(this.manager), this);
+        List<Listener> listeners = List.of(
+                new PvPListener(this.manager),
+                new SleepListener(this.manager)
+        );
+        for (Listener listener : listeners) {
+            Bukkit.getPluginManager().registerEvents(listener, this);
+        }
     }
 
     @Override
