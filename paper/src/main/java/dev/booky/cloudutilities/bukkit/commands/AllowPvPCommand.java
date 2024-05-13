@@ -7,6 +7,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.booky.cloudutilities.bukkit.CloudUtilsManager;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.bukkit.command.CommandSender;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
@@ -16,10 +18,12 @@ import static io.papermc.paper.command.brigadier.Commands.literal;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+@Singleton
 public class AllowPvPCommand extends AbstractCommand {
 
     private final CloudUtilsManager manager;
 
+    @Inject
     public AllowPvPCommand(CloudUtilsManager manager) {
         super("allowpvp");
         this.manager = manager;

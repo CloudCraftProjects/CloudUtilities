@@ -10,6 +10,8 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.SignedMessageResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import net.kyori.adventure.chat.ChatType;
 import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.text.Component;
@@ -28,6 +30,7 @@ import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.players;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.signedMessage;
 
+@Singleton
 public class VanillaMsgCommand extends AbstractCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("CloudUtilities");
@@ -36,6 +39,7 @@ public class VanillaMsgCommand extends AbstractCommand {
     private static final List<String> MINECRAFT_TELL_COMMANDS = TELL_COMMANDS.stream()
             .map(label -> NamespacedKey.MINECRAFT + ":" + label).toList();
 
+    @Inject
     public VanillaMsgCommand() {
         super(TELL_COMMANDS.getFirst(),
                 TELL_COMMANDS.subList(1, TELL_COMMANDS.size())

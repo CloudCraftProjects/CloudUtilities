@@ -1,11 +1,14 @@
 package dev.booky.cloudutilities.bukkit;
 // Created by booky10 in CloudUtilities (04:01 11.05.2024.)
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import dev.booky.cloudcore.i18n.CloudTranslator;
 import dev.booky.cloudutilities.bukkit.commands.AbstractCommand;
 import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
 import dev.booky.cloudutilities.bukkit.commands.FlyCommand;
 import dev.booky.cloudutilities.bukkit.commands.VanillaMsgCommand;
+import dev.booky.cloudutilities.bukkit.injection.CloudUtilModule;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
 import dev.booky.cloudutilities.bukkit.listener.SleepListener;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
@@ -25,8 +28,22 @@ public class CloudUtilitiesMain extends JavaPlugin {
             Locale.ENGLISH, Locale.GERMAN
     );
 
+    private static final List<Class<? extends AbstractCommand>> COMMAND_CLASSES = List.of(
+            AllowPvPCommand.class, FlyCommand.class, VanillaMsgCommand.class
+    );
+    private static final List<Class<? extends Listener>> LISTENER_CLASSES = List.of(
+            PvPListener.class, SleepListener.class
+    );
+
+    private final Injector injector;
+
     private @MonotonicNonNull CloudTranslator i18n;
     private @MonotonicNonNull CloudUtilsManager manager;
+
+    public CloudUtilitiesMain() {
+        CloudUtilModule module = new CloudUtilModule(this);
+        this.injector = Guice.createInjector(module);
+    }
 
     @Override
     public void onLoad() {
@@ -35,17 +52,13 @@ public class CloudUtilitiesMain extends JavaPlugin {
                 SUPPORTED_LOCALES);
         this.i18n.load();
 
-        this.manager = new CloudUtilsManager(this);
+        this.manager = this.injector.getInstance(CloudUtilsManager.class);
         Bukkit.getServicesManager().register(CloudUtilsManager.class,
                 this.manager, this, ServicePriority.Normal);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
-            List<AbstractCommand> commands = List.of(
-                    new AllowPvPCommand(this.manager),
-                    new FlyCommand(),
-                    new VanillaMsgCommand()
-            );
-            for (AbstractCommand command : commands) {
+            for (Class<? extends AbstractCommand> commandClass : COMMAND_CLASSES) {
+                AbstractCommand command = this.injector.getInstance(commandClass);
                 command.register(event.registrar(), this);
             }
         });
@@ -53,11 +66,8 @@ public class CloudUtilitiesMain extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        List<Listener> listeners = List.of(
-                new PvPListener(this.manager),
-                new SleepListener(this.manager)
-        );
-        for (Listener listener : listeners) {
+        for (Class<? extends Listener> listenerClass : LISTENER_CLASSES) {
+            Listener listener = this.injector.getInstance(listenerClass);
             Bukkit.getPluginManager().registerEvents(listener, this);
         }
     }
@@ -67,6 +77,10 @@ public class CloudUtilitiesMain extends JavaPlugin {
         if (this.i18n != null) {
             this.i18n.unload();
         }
+    }
+
+    public Injector getInjector() {
+        return this.injector;
     }
 
     public CloudUtilsManager getManager() {

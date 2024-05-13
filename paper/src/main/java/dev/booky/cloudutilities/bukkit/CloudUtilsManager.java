@@ -1,6 +1,8 @@
 package dev.booky.cloudutilities.bukkit;
 // Created by booky10 in CloudUtilities (04:08 11.05.2024.)
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.bukkit.plugin.Plugin;
 
 import java.nio.file.Path;
@@ -8,6 +10,7 @@ import java.util.function.Consumer;
 
 import static dev.booky.cloudutilities.bukkit.CloudUtilsConfig.CONFIGURATE_LOADER;
 
+@Singleton
 public class CloudUtilsManager {
 
     private final Plugin plugin;
@@ -15,6 +18,7 @@ public class CloudUtilsManager {
     private final Path configPath;
     private CloudUtilsConfig config;
 
+    @Inject
     public CloudUtilsManager(Plugin plugin) {
         this.plugin = plugin;
 

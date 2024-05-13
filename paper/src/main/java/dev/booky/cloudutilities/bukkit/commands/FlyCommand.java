@@ -6,6 +6,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,8 +23,10 @@ import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.players;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+@Singleton
 public class FlyCommand extends AbstractCommand {
 
+    @Inject
     public FlyCommand() {
         super("fly");
     }

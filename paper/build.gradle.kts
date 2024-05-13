@@ -8,9 +8,16 @@ val plugin: Configuration by configurations.creating {
 }
 
 dependencies {
-    compileOnly(libs.paper.api)
+    compileOnly(libs.paper.api) {
+        exclude(group = "javax.inject")
+    }
 
     compileOnly(libs.cloudcore.bukkit)
+
+    listOf(libs.guice).forEach {
+        compileOnlyApi(it)
+        library(it)
+    }
 
     plugin(variantOf(libs.cloudcore.bukkit) { classifier("all") })
 }

@@ -10,8 +10,8 @@ cloudcore = "1.1.0-SNAPSHOT"
 
 # paper
 paper = "1.20.6-R0.1-SNAPSHOT"
-commandapi = "9.4.1"
 debuggery = "1.5.1"
+guice = "7.0.0"
 
 # velocity
 velocity = "3.3.0-SNAPSHOT"
@@ -28,6 +28,7 @@ ideaext = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaext"
 # paper
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 cloudcore-bukkit = { module = "dev.booky:cloudcore", version.ref = "cloudcore" }
+guice = { module = "com.google.inject:guice", version.ref = "guice" }
 
 # velocity
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
