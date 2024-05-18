@@ -22,11 +22,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.Duration;
 import java.util.Collection;
 
+import static dev.booky.cloudutilities.bukkit.arguments.ComponentMessageArgumentType.componentMessage;
 import static dev.booky.cloudutilities.bukkit.arguments.DurationArgumentType.duration;
 import static io.papermc.paper.command.brigadier.Commands.argument;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.MessageComponentSerializer.message;
-import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.component;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.playerProfiles;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -49,7 +49,7 @@ public class TempBanCommand extends AbstractCommand {
                 .then(argument("targets", playerProfiles())
                         .then(argument("duration", duration())
                                 .executes(this::executeNoReason)
-                                .then(argument("reason", component())
+                                .then(argument("reason", componentMessage())
                                         .executes(this::execute))))
                 .build();
     }
