@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import dev.booky.cloudutilities.config.CloudUtilsConfig.TablistConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.util.Ticks;
@@ -22,10 +23,7 @@ import java.util.function.Supplier;
 public final class TablistUpdater {
 
     private final ProxyServer proxy;
-
-    private final int updateInterval;
-    private final List<Component> headers;
-    private final List<Component> footers;
+    private final TablistConfig tablistConfig;
 
     private final TablistPart header = new TablistPart();
     private final TablistPart footer = new TablistPart();
@@ -33,11 +31,9 @@ public final class TablistUpdater {
     private int updateTick = 0;
     private boolean dirty = true;
 
-    public TablistUpdater(ProxyServer proxy, int updateInterval, List<Component> headers, List<Component> footers) {
+    public TablistUpdater(ProxyServer proxy, TablistConfig tablistConfig) {
         this.proxy = proxy;
-        this.updateInterval = updateInterval;
-        this.headers = headers;
-        this.footers = footers;
+        this.tablistConfig = tablistConfig;
     }
 
     public ScheduledTask start(Object plugin) {
@@ -47,10 +43,10 @@ public final class TablistUpdater {
     }
 
     public void executeUpdate() {
-        if (this.updateTick++ >= this.updateInterval) {
+        if (this.updateTick++ >= this.tablistConfig.getUpdateInterval()) {
             this.updateTick = 0;
-            this.header.processIntervalTick(this.headers);
-            this.footer.processIntervalTick(this.footers);
+            this.header.processIntervalTick(this.tablistConfig.getHeaders());
+            this.footer.processIntervalTick(this.tablistConfig.getFooters());
         }
 
         if (this.dirty) {

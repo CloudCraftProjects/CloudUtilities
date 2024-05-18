@@ -1,126 +1,157 @@
 package dev.booky.cloudutilities;
 // Created by booky10 in CustomConnector (14:54 19.06.21)
 
+import com.google.inject.Injector;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
-import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import dev.booky.cloudcore.i18n.CloudTranslator;
+import dev.booky.cloudutilities.commands.AbstractCommand;
 import dev.booky.cloudutilities.commands.ConnectCommand;
-import dev.booky.cloudutilities.commands.LobbyCommand;
+import dev.booky.cloudutilities.commands.HubCommand;
 import dev.booky.cloudutilities.commands.LoopCommand;
 import dev.booky.cloudutilities.commands.PingCommand;
+import dev.booky.cloudutilities.config.CloudUtilsConfig;
 import dev.booky.cloudutilities.listener.PingListener;
 import dev.booky.cloudutilities.listener.TablistListener;
+import dev.booky.cloudutilities.util.BuildConstants;
 import dev.booky.cloudutilities.util.TablistUpdater;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.key.Key;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import static dev.booky.cloudutilities.config.CloudUtilsConfig.CONFIGURATE_LOADER;
+import static net.kyori.adventure.key.Key.key;
 
 @Plugin(
         id = "cloudutilities",
         name = "CloudUtilities",
-        version = "${version}",
-        authors = "booky10"
+        version = BuildConstants.PLUGIN_VERSION,
+        authors = "booky10",
+        dependencies = @Dependency(id = "cloudcore")
 )
 @Singleton
 public class CloudUtilitiesMain {
 
-    private final ProxyServer server;
-    private final Path dataDirectory;
+    private static final List<Class<? extends AbstractCommand>> COMMAND_CLASSES = List.of(
+            ConnectCommand.class, HubCommand.class, LoopCommand.class, PingCommand.class
+    );
+    private static final List<Locale> SUPPORTED_LOCALES = List.of(
+            Locale.ENGLISH, Locale.GERMAN
+    );
 
+    private final Injector injector;
+    private final ProxyServer server;
+
+    private final Path configPath;
+    private CloudUtilsConfig config;
+
+    private final List<Object> registeredListeners = new ArrayList<>();
     private @Nullable ScheduledTask tablistTask;
+    private @Nullable CloudTranslator translator;
 
     @Inject
-    public CloudUtilitiesMain(ProxyServer server, @DataDirectory Path dataDirectory) {
+    public CloudUtilitiesMain(
+            Injector injector,
+            ProxyServer server,
+            @DataDirectory Path dataDirectory
+    ) {
+        this.injector = injector;
         this.server = server;
-        this.dataDirectory = dataDirectory;
-    }
 
-    private static List<Component> getComponents(ConfigurationNode node) {
-        try {
-            return node.getList(String.class, List::of)
-                    .stream().map(MiniMessage.miniMessage()::deserialize).toList();
-        } catch (SerializationException exception) {
-            throw new RuntimeException(exception);
-        }
+        this.configPath = dataDirectory.resolve("config.yml");
+        this.config = this.loadConfig();
     }
 
     @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent event) throws IOException {
-        this.server.getCommandManager().register(LoopCommand.create(this, this.server));
-        this.server.getCommandManager().register(ConnectCommand.create(this.server));
-        this.server.getCommandManager().register(PingCommand.create(this.server));
-
-        this.server.getCommandManager().register("lobby", LobbyCommand.create(this.server),
-                "hub", "l", "h", "leave", "quit", "exit");
+    public void onProxyInitialization(ProxyInitializeEvent event) {
+        for (Class<? extends AbstractCommand> commandClass : COMMAND_CLASSES) {
+            AbstractCommand command = this.injector.getInstance(commandClass);
+            command.register(this.server.getCommandManager(), this);
+        }
 
         this.reload();
     }
 
-    private synchronized void reload() throws IOException {
-        this.server.getEventManager().unregisterListeners(this);
+    @Subscribe
+    public void onProxyReload(ProxyReloadEvent event) {
+        this.reload();
+    }
 
-        this.server.getEventManager().register(this, ProxyReloadEvent.class, handler -> {
-            try {
-                this.reload();
-            } catch (IOException exception) {
-                throw new RuntimeException(exception);
-            }
-        });
-
-        Path configPath = this.dataDirectory.resolve("config.yml");
-        Files.createDirectories(configPath.getParent());
-        if (!Files.exists(configPath)) {
-            Files.createFile(configPath);
+    private void unload() {
+        // unregister all listeners
+        for (Object listener : this.registeredListeners) {
+            this.server.getEventManager().unregisterListener(this, listener);
         }
 
-        ConfigurationNode config = YamlConfigurationLoader.builder()
-                .path(configPath).build().load();
+        // cancel tablist updating task
+        if (this.tablistTask != null) {
+            this.tablistTask.cancel();
+            this.tablistTask = null;
+        }
 
-        {
-            if (this.tablistTask != null) {
-                this.tablistTask.cancel();
-                this.tablistTask = null;
-            }
+        // unload translator from registry
+        if (this.translator != null) {
+            this.translator.unload();
+            this.translator = null;
+        }
+    }
 
-            List<Component> headers = getComponents(config.node("tablist", "headers"));
-            List<Component> footers = getComponents(config.node("tablist", "footers"));
-            int updateInterval = config.node("tablist", "update-interval").getInt(40);
+    private synchronized void reload() {
+        this.unload(); // unload before reload
 
-            if (!headers.isEmpty() || !footers.isEmpty()) {
-                TablistUpdater updater = new TablistUpdater(this.server, updateInterval, headers, footers);
-                this.tablistTask = updater.start(this);
+        // reload configuration
+        this.reloadConfig();
 
-                TablistListener listener = new TablistListener(updater);
-                this.server.getEventManager().register(this, listener);
+        // load and register translations
+        Key translatorName = key("cloudutilities", "i18n");
+        this.translator = new CloudTranslator(this.getClass().getClassLoader(),
+                translatorName, SUPPORTED_LOCALES);
+        this.translator.load();
 
-                for (Player player : this.server.getAllPlayers()) {
-                    updater.updateTablist(player);
-                }
+        // setup tablist, if not empty
+        if (!this.config.getTablist().isEmpty()) {
+            TablistUpdater updater = new TablistUpdater(this.server, this.config.getTablist());
+            this.tablistTask = updater.start(this);
+
+            TablistListener listener = new TablistListener(updater);
+            this.server.getEventManager().register(this, listener);
+            this.registeredListeners.add(listener);
+
+            for (Player player : this.server.getAllPlayers()) {
+                updater.updateTablist(player);
             }
         }
 
-        {
-            ProtocolVersion first = ProtocolVersion.getProtocolVersion(config
-                    .node("ping", "first-supported").getInt(-1));
-            ProtocolVersion last = ProtocolVersion.getProtocolVersion(config
-                    .node("ping", "last-supported").getInt(-1));
-            this.server.getEventManager().register(this, new PingListener(first, last));
+        // setup ping, if not useless
+        if (!this.config.getPing().isDisabled()) {
+            PingListener listener = new PingListener(this.config.getPing());
+            this.server.getEventManager().register(this, listener);
+            this.registeredListeners.add(listener);
         }
+    }
+
+    public void reloadConfig() {
+        this.config = this.loadConfig();
+    }
+
+    private CloudUtilsConfig loadConfig() {
+        return CONFIGURATE_LOADER.loadObject(this.configPath, CloudUtilsConfig.class);
+    }
+
+    public CloudUtilsConfig getConfig() {
+        return this.config;
     }
 }

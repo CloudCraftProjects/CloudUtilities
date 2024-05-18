@@ -1,30 +1,34 @@
 plugins {
-    alias(libs.plugins.runtask.velocity)
+    alias(libs.plugins.run.velocity)
+    alias(libs.plugins.blossom)
+}
+
+val plugin: Configuration by configurations.creating {
+    isTransitive = false
 }
 
 dependencies {
     compileOnly(libs.velocity.api)
     annotationProcessor(libs.velocity.api)
+
+    compileOnly(libs.cloudcore.velocity)
+
+    plugin(variantOf(libs.cloudcore.velocity) { classifier("all") })
+}
+
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property("version", project.version.toString())
+            }
+        }
+    }
 }
 
 tasks {
-    val processSources = register("processSources", Sync::class) {
-        from(sourceSets.main.map { it.java.srcDirs }.get())
-
-        inputs.property("version", project.version)
-        filesNotMatching("") { // go over every file
-            expand("version" to project.version)
-        }
-
-        into(layout.buildDirectory.dir("src"))
-    }
-
-    withType<JavaCompile> {
-        dependsOn(processSources)
-        source = fileTree(processSources.map { it.destinationDir }.get())
-    }
-
     runVelocity {
         velocityVersion(libs.versions.velocity.get())
+        pluginJars.from(plugin.resolve())
     }
 }
