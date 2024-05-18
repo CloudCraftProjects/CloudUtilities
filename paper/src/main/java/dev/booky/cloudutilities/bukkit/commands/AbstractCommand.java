@@ -1,18 +1,13 @@
 package dev.booky.cloudutilities.bukkit.commands;
 // Created by booky10 in CloudUtilities (04:13 11.05.2024.)
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import net.kyori.adventure.text.Component;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
-
-import static io.papermc.paper.command.brigadier.MessageComponentSerializer.message;
 
 @ApiStatus.Internal
 public abstract class AbstractCommand {
@@ -25,14 +20,6 @@ public abstract class AbstractCommand {
     protected AbstractCommand(String label, String... aliases) {
         this.label = label;
         this.aliases = List.of(aliases);
-    }
-
-    public static SimpleCommandExceptionType buildExceptionType(Component message) {
-        return new SimpleCommandExceptionType(message().serialize(message));
-    }
-
-    public static CommandSyntaxException buildException(Component message) {
-        return buildExceptionType(message).create();
     }
 
     public String getPermission() {

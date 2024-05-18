@@ -24,9 +24,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 
-import static dev.booky.cloudutilities.bukkit.arguments.AddressArgumentType.address;
-import static dev.booky.cloudutilities.bukkit.arguments.ComponentMessageArgumentType.componentMessage;
-import static dev.booky.cloudutilities.bukkit.arguments.DurationArgumentType.duration;
+import static dev.booky.cloudcore.commands.AddressArgumentType.address;
+import static dev.booky.cloudcore.commands.CommandUtil.buildExceptionType;
+import static dev.booky.cloudcore.commands.ComponentMessageArgumentType.componentMessage;
+import static dev.booky.cloudcore.commands.DurationArgumentType.duration;
 import static io.papermc.paper.command.brigadier.Commands.argument;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.MessageComponentSerializer.message;

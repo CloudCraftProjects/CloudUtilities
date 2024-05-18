@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+import static dev.booky.cloudcore.commands.CommandUtil.buildException;
 import static io.papermc.paper.command.brigadier.Commands.argument;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.signedMessage;

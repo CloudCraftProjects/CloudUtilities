@@ -22,8 +22,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.Duration;
 import java.util.Collection;
 
-import static dev.booky.cloudutilities.bukkit.arguments.ComponentMessageArgumentType.componentMessage;
-import static dev.booky.cloudutilities.bukkit.arguments.DurationArgumentType.duration;
+import static dev.booky.cloudcore.commands.CommandUtil.buildExceptionType;
+import static dev.booky.cloudcore.commands.ComponentMessageArgumentType.componentMessage;
+import static dev.booky.cloudcore.commands.DurationArgumentType.duration;
 import static io.papermc.paper.command.brigadier.Commands.argument;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.MessageComponentSerializer.message;
