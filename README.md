@@ -23,7 +23,7 @@ A Minecraft velocity/paper plugin providing useful utilities for running the Clo
 
 ## Download
 
-https://dl.cloudcraftmc.de/r/cloudutilities
+https://dl.cloudcraftmc.de/CloudUtilities
 
 ## Usage
 
