@@ -1,52 +1,54 @@
 package dev.booky.cloudutilities.bukkit.commands;
-// Created by booky10 in CloudUtilities (18:26 15.05.2024.)
+// Created by booky10 in CloudUtilities (17:29 18.05.2024.)
 
-import com.destroystokyo.paper.profile.PlayerProfile;
+import com.google.common.net.InetAddresses;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.ban.BanListType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentBuilder;
 import org.bukkit.BanEntry;
 import org.bukkit.Bukkit;
-import org.bukkit.ban.ProfileBanList;
+import org.bukkit.ban.IpBanList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerKickEvent.Cause;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.Collection;
 
+import static dev.booky.cloudutilities.bukkit.arguments.AddressArgumentType.address;
 import static dev.booky.cloudutilities.bukkit.arguments.DurationArgumentType.duration;
 import static io.papermc.paper.command.brigadier.Commands.argument;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 import static io.papermc.paper.command.brigadier.MessageComponentSerializer.message;
 import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.component;
-import static io.papermc.paper.command.brigadier.argument.ArgumentTypes.playerProfiles;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 @Singleton
-public class TempBanCommand extends AbstractCommand {
+public class TempBanIpCommand extends AbstractCommand {
 
     private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED =
-            buildExceptionType(translatable("commands.ban.failed"));
+            buildExceptionType(translatable("commands.banip.failed"));
 
     @Inject
-    public TempBanCommand() {
-        super("tempban", "tban");
+    public TempBanIpCommand() {
+        super("tempban-ip", "tban-ip");
     }
 
     @Override
     protected LiteralCommandNode<CommandSourceStack> buildNode() {
         return literal(this.getLabel())
                 .requires(source -> source.getSender().hasPermission(this.getPermission()))
-                .then(argument("targets", playerProfiles())
+                .then(argument("target", address())
                         .then(argument("duration", duration())
                                 .executes(this::executeNoReason)
                                 .then(argument("reason", component())
@@ -55,58 +57,60 @@ public class TempBanCommand extends AbstractCommand {
     }
 
     private int executeNoReason(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        Collection<PlayerProfile> targets = ctx.getArgument("targets", PlayerProfileListResolver.class)
-                .resolve(ctx.getSource());
+        InetAddress address = ctx.getArgument("target", InetAddress.class);
         Duration duration = ctx.getArgument("duration", Duration.class);
-        return this.execute(ctx.getSource(), targets, duration, null);
+        return this.execute(ctx.getSource(), address, duration, null);
     }
 
     private int execute(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        Collection<PlayerProfile> targets = ctx.getArgument("targets", PlayerProfileListResolver.class)
-                .resolve(ctx.getSource());
+        InetAddress address = ctx.getArgument("target", InetAddress.class);
         Duration duration = ctx.getArgument("duration", Duration.class);
         Component reason = ctx.getArgument("reason", Component.class);
-        return this.execute(ctx.getSource(), targets, duration, reason);
+        return this.execute(ctx.getSource(), address, duration, reason);
     }
 
     public int execute(
             CommandSourceStack source,
-            Collection<PlayerProfile> targets,
+            InetAddress address,
             Duration duration,
             @Nullable Component reason
     ) throws CommandSyntaxException {
+        IpBanList banList = Bukkit.getBanList(BanListType.IP);
+        if (banList.isBanned(address)) {
+            throw ERROR_ALREADY_BANNED.create();
+        }
+
         String stringReason = reason == null ? null : message().serialize(reason).getString();
         String sourceName = source.getExecutor() == null ? source.getSender().getName() : source.getExecutor().getName();
 
-        ProfileBanList banlist = Bukkit.getBanList(BanListType.PROFILE);
-        int successCount = 0;
-        for (PlayerProfile target : targets) {
-            if (banlist.isBanned(target)) {
-                continue; // skip
-            }
-            BanEntry<PlayerProfile> entry = banlist.addBan(target, stringReason, duration, sourceName);
-            if (entry == null) {
-                continue; // somehow failed to ban the target
-            }
-            successCount++;
-
-            source.getSender().sendMessage(
-                    translatable("commands.ban.success",
-                            text(String.valueOf(target.getName())),
-                            text(String.valueOf(entry.getReason())))
-            );
-
-            if (target.getId() != null) {
-                Player targetPlayer = Bukkit.getPlayer(target.getId());
-                if (targetPlayer != null) {
-                    targetPlayer.kick(translatable("multiplayer.disconnect.banned"), Cause.BANNED);
-                }
-            }
+        BanEntry<InetAddress> entry = banList.addBan(address, stringReason, duration, sourceName);
+        if (entry == null) {
+            return 0; // somehow failed to ban
         }
 
-        if (successCount != 0) {
-            return successCount;
+        ComponentBuilder<?, ?> playerNames = text();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            InetSocketAddress playerAddress = player.getAddress();
+            if (playerAddress == null || !address.equals(playerAddress.getAddress())) {
+                continue;
+            }
+
+            if (!playerNames.children().isEmpty()) {
+                playerNames.append(text(", "));
+            }
+            playerNames.applicableApply(player.teamDisplayName());
+            player.kick(translatable("multiplayer.disconnect.ip_banned"), Cause.IP_BANNED);
         }
-        throw ERROR_ALREADY_BANNED.create();
+        int affectedCount = NumberConversions.ceil(playerNames.children().size() / 2d);
+
+        source.getSender().sendMessage(translatable("commands.banip.success",
+                text(InetAddresses.toAddrString(address)),
+                text(String.valueOf(entry.getReason()))));
+        if (affectedCount > 0) {
+            source.getSender().sendMessage(translatable("commands.banip.info",
+                    text(affectedCount), playerNames));
+        }
+
+        return affectedCount;
     }
 }

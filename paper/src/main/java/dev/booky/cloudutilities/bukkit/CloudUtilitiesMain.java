@@ -9,6 +9,7 @@ import dev.booky.cloudutilities.bukkit.commands.AllowPvPCommand;
 import dev.booky.cloudutilities.bukkit.commands.FlyCommand;
 import dev.booky.cloudutilities.bukkit.commands.ReplyCommand;
 import dev.booky.cloudutilities.bukkit.commands.TempBanCommand;
+import dev.booky.cloudutilities.bukkit.commands.TempBanIpCommand;
 import dev.booky.cloudutilities.bukkit.commands.VanillaMsgCommand;
 import dev.booky.cloudutilities.bukkit.injection.CloudUtilModule;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
@@ -32,7 +33,7 @@ public class CloudUtilitiesMain extends JavaPlugin {
 
     private static final List<Class<? extends AbstractCommand>> COMMAND_CLASSES = List.of(
             AllowPvPCommand.class, FlyCommand.class, ReplyCommand.class,
-            TempBanCommand.class, VanillaMsgCommand.class
+            TempBanCommand.class, TempBanIpCommand.class, VanillaMsgCommand.class
     );
     private static final List<Class<? extends Listener>> LISTENER_CLASSES = List.of(
             PvPListener.class, SleepListener.class

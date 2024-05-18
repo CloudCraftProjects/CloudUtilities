@@ -27,8 +27,12 @@ public abstract class AbstractCommand {
         this.aliases = List.of(aliases);
     }
 
-    protected static CommandSyntaxException buildException(Component message) {
-        return new SimpleCommandExceptionType(message().serialize(message)).create();
+    public static SimpleCommandExceptionType buildExceptionType(Component message) {
+        return new SimpleCommandExceptionType(message().serialize(message));
+    }
+
+    public static CommandSyntaxException buildException(Component message) {
+        return buildExceptionType(message).create();
     }
 
     public String getPermission() {

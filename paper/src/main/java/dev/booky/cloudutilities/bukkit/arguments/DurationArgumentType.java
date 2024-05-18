@@ -3,7 +3,6 @@ package dev.booky.cloudutilities.bukkit.arguments;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Message;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -22,7 +21,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 // adopted from https://github.com/LuckPerms/LuckPerms/blob/5c1ea5633ed5986c02d3fa1ccf187638d143c091/common/src/main/java/me/lucko/luckperms/common/util/DurationParser.java (MIT License)
-public class DurationArgumentType implements CustomArgumentType<Duration, String> {
+public class DurationArgumentType implements CustomArgumentType.Converted<Duration, String> {
 
     private static final Map<ChronoUnit, String> UNITS_PATTERNS = ImmutableMap.<ChronoUnit, String>builder()
             .put(ChronoUnit.YEARS, "y(?:ear)?s?")
@@ -50,12 +49,11 @@ public class DurationArgumentType implements CustomArgumentType<Duration, String
     }
 
     @Override
-    public Duration parse(StringReader reader) throws CommandSyntaxException {
-        String input = reader.readString();
-        Matcher matcher = PATTERN.matcher(input);
+    public Duration convert(String nativeType) throws CommandSyntaxException {
+        Matcher matcher = PATTERN.matcher(nativeType);
         if (!matcher.matches()) {
             Message message = message().serialize(translatable(
-                    "cu.argument.duration.invalid-duration", text(input)));
+                    "cu.argument.duration.invalid-duration", text(nativeType)));
             throw new SimpleCommandExceptionType(message).create();
         }
 
