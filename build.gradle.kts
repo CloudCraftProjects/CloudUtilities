@@ -13,20 +13,17 @@ plugins {
     alias(libs.plugins.blossom) apply false
 }
 
-tasks["jar"].enabled = false
+tasks.withType<Jar> {
+    enabled = false
+}
 
 allprojects {
     apply<IndraPlugin>()
 
     group = "dev.booky"
-    version = "1.4.0"
+    version = "2.0.0-SNAPSHOT"
 
     repositories {
-        mavenLocal {
-            content {
-                includeModuleByRegex("dev\\.booky", "cloudcore.*")
-            }
-        }
         maven("https://repo.cloudcraftmc.de/public/")
     }
 
