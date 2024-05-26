@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.kyori.indra.IndraPlugin
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 
@@ -11,6 +13,8 @@ plugins {
     alias(libs.plugins.ideaext)
     alias(libs.plugins.indra)
     alias(libs.plugins.blossom) apply false
+
+    alias(libs.plugins.shadow) apply false
 }
 
 tasks.withType<Jar> {
@@ -44,6 +48,7 @@ subprojects {
     apply<JavaLibraryPlugin>()
     apply<MavenPublishPlugin>()
     apply<IdeaExtPlugin>()
+    apply<ShadowPlugin>()
 
     publishing {
         publications.create<MavenPublication>("maven") {
@@ -60,6 +65,10 @@ subprojects {
         withType<Jar> {
             archiveBaseName = project.name
             destinationDirectory = rootProject.tasks.jar.map { it.destinationDirectory }.get()
+        }
+
+        assemble {
+            dependsOn(project.tasks.withType<ShadowJar>())
         }
     }
 }

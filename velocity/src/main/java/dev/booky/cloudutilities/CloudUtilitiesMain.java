@@ -25,6 +25,7 @@ import dev.booky.cloudutilities.util.TablistUpdater;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import net.kyori.adventure.key.Key;
+import org.bstats.velocity.Metrics;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.nio.file.Path;
@@ -54,6 +55,7 @@ public class CloudUtilitiesMain {
 
     private final Injector injector;
     private final ProxyServer server;
+    private final Metrics.Factory metrics;
 
     private final Path configPath;
     private CloudUtilsConfig config;
@@ -66,10 +68,12 @@ public class CloudUtilitiesMain {
     public CloudUtilitiesMain(
             Injector injector,
             ProxyServer server,
-            @DataDirectory Path dataDirectory
+            @DataDirectory Path dataDirectory,
+            Metrics.Factory metrics
     ) {
         this.injector = injector;
         this.server = server;
+        this.metrics = metrics;
 
         this.configPath = dataDirectory.resolve("config.yml");
         this.config = this.loadConfig();
@@ -77,6 +81,8 @@ public class CloudUtilitiesMain {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        this.metrics.make(this, 21858);
+
         for (Class<? extends AbstractCommand> commandClass : COMMAND_CLASSES) {
             AbstractCommand command = this.injector.getInstance(commandClass);
             command.register(this.server.getCommandManager(), this);

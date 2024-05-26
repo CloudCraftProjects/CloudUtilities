@@ -4,9 +4,11 @@ runtask = "2.3.0"
 indra = "3.1.3"
 blossom = "2.1.0"
 ideaext = "1.1.8"
+shadow = "8.1.7"
 
 # common
 cloudcore = "1.1.0-SNAPSHOT"
+bstats = "3.0.2"
 
 # paper
 paper = "1.20.6-R0.1-SNAPSHOT"
@@ -23,13 +25,16 @@ run-velocity = { id = "xyz.jpenilla.run-velocity", version.ref = "runtask" }
 indra = { id = "net.kyori.indra", version.ref = "indra" }
 blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
 ideaext = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaext" }
+shadow = { id = "io.github.goooler.shadow", version.ref = "shadow" }
 
 [libraries]
 # paper
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 cloudcore-bukkit = { module = "dev.booky:cloudcore", version.ref = "cloudcore" }
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
+bstats-bukkit = {module="org.bstats:bstats-bukkit",version.ref="bstats"}
 
 # velocity
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
 cloudcore-velocity = { module = "dev.booky:cloudcore-velocity", version.ref = "cloudcore" }
+bstats-velocity = {module="org.bstats:bstats-velocity",version.ref="bstats"}

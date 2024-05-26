@@ -13,6 +13,7 @@ dependencies {
     }
 
     compileOnly(libs.cloudcore.bukkit)
+    implementation(libs.bstats.bukkit)
 
     listOf(libs.guice).forEach {
         compileOnlyApi(it)
@@ -34,6 +35,10 @@ tasks {
                 "debuggery-bukkit-${libs.versions.debuggery.get()}.jar"
             )
         }
+    }
+
+    shadowJar {
+        relocate("org.bstats", "${project.group}.cloudutilities.bstats")
     }
 
     withType<Jar> {

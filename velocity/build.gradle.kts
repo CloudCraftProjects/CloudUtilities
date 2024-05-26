@@ -12,6 +12,7 @@ dependencies {
     annotationProcessor(libs.velocity.api)
 
     compileOnly(libs.cloudcore.velocity)
+    implementation(libs.bstats.velocity)
 
     plugin(variantOf(libs.cloudcore.velocity) { classifier("all") })
 }
@@ -30,5 +31,9 @@ tasks {
     runVelocity {
         velocityVersion(libs.versions.velocity.get())
         pluginJars.from(plugin.resolve())
+    }
+
+    shadowJar {
+        relocate("org.bstats", "${project.group}.cloudutilities.bstats")
     }
 }

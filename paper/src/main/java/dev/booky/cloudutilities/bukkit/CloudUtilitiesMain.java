@@ -15,6 +15,7 @@ import dev.booky.cloudutilities.bukkit.injection.CloudUtilModule;
 import dev.booky.cloudutilities.bukkit.listener.PvPListener;
 import dev.booky.cloudutilities.bukkit.listener.SleepListener;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Listener;
@@ -51,6 +52,8 @@ public class CloudUtilitiesMain extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        new Metrics(this, 21857);
+
         this.i18n = new CloudTranslator(this.getClassLoader(),
                 new NamespacedKey(this, "i18n"),
                 SUPPORTED_LOCALES);
