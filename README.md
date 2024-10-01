@@ -25,6 +25,10 @@ A Minecraft velocity/paper plugin providing useful utilities for running the Clo
 
 https://dl.cloudcraftmc.de/CloudUtilities
 
+> [!NOTE]
+> Depends
+> on [CloudCore](https://modrinth.com/project/cloudcore).
+
 ## Usage
 
 Just drop the specific paper/velocity jar in the `plugins` directory and restart the server.
