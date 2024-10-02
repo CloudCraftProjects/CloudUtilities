@@ -85,8 +85,10 @@ allprojects {
         } else {
             // this sadly needs a dummy file for github release parenting to properly work
             file = rootProject.layout.buildDirectory.file("empty.txt")
-            if (Files.notExists(file.asFile.get().toPath())) {
-                Files.createFile(file.asFile.get().toPath())
+            val filePath = file.asFile.get().toPath()
+            if (Files.notExists(filePath)) {
+                Files.createDirectories(filePath.parent)
+                Files.createFile(filePath)
             }
         }
 
