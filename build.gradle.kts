@@ -25,7 +25,6 @@ allprojects {
     apply<IndraPlugin>()
 
     group = "dev.booky"
-    version = "2.0.0-SNAPSHOT"
 
     repositories {
         maven("https://repo.cloudcraftmc.de/public/")
@@ -54,10 +53,6 @@ subprojects {
         publications.create<MavenPublication>("maven") {
             artifactId = project.name.lowercase()
             from(components["java"])
-        }
-        repositories.maven("https://repo.cloudcraftmc.de/releases") {
-            name = "horreo"
-            credentials(PasswordCredentials::class)
         }
     }
 
