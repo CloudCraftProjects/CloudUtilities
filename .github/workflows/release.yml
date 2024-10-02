@@ -34,13 +34,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const release = github.rest.repos.listReleases({
+            const releases = await github.rest.repos.listReleases({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 1,
-            })[0];
+            });
+            const release = releases[0];
             const dummyAsset = release.assets.find(asset => asset.name == "empty.txt");
-            github.rest.repos.deleteReleaseAsset({
+            await github.rest.repos.deleteReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
               asset_id: dummyAsset.id,
