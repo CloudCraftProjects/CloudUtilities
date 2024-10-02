@@ -122,6 +122,9 @@ allprojects {
                     start = rootProject.libs.versions.paper.get().split("-")[0]
                     end = "latest"
                 }
+
+                // both paper and velocity plugins require this dependency
+                requires("cloudcore")
             }
         }
     }
