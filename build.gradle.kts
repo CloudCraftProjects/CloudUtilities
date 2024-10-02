@@ -88,7 +88,7 @@ allprojects {
             val filePath = file.asFile.get().toPath()
             if (Files.notExists(filePath)) {
                 Files.createDirectories(filePath.parent)
-                Files.createFile(filePath)
+                Files.writeString(filePath, "dummy file")
             }
         }
 
