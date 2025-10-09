@@ -22,6 +22,8 @@ plugins {
     alias(libs.plugins.publishing)
 }
 
+val minVersion: String by project.ext
+
 tasks.withType<Jar> {
     enabled = false
 }
@@ -119,7 +121,7 @@ allprojects {
 
                 projectId = "dGVhuvFX"
                 minecraftVersionRange {
-                    start = rootProject.libs.versions.paper.get().split("-")[0]
+                    start = minVersion
                     end = "latest"
                 }
 
