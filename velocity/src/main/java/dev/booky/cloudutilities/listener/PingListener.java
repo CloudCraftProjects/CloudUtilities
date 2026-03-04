@@ -30,7 +30,8 @@ public class PingListener {
                 && (!last.isSupported() || playerVer.noGreaterThan(last))) {
             protocol = playerVer.getProtocol(); // valid version
         } else {
-            protocol = -1; // invalid version
+            // invalid version, pass nearest supported version
+            protocol = (playerVer.lessThan(first) ? first : last).getProtocol();
         }
 
         String versionName = SOFTWARE_NAME + this.getVersionRange(first, last);
