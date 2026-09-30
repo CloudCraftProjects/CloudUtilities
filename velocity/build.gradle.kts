@@ -17,6 +17,13 @@ dependencies {
     plugin(variantOf(libs.cloudcore.velocity) { classifier("all") })
 }
 
+configure<JavaPluginExtension> {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    disableAutoTargetJvm()
+}
+
 sourceSets {
     main {
         blossom {
@@ -28,6 +35,10 @@ sourceSets {
 }
 
 tasks {
+    withType<JavaCompile> {
+        options.release = 21
+    }
+
     runVelocity {
         velocityVersion(libs.versions.velocity.get())
         pluginJars.from(plugin.resolve())
