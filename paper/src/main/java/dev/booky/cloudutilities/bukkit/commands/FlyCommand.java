@@ -11,6 +11,7 @@ import jakarta.inject.Singleton;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,9 +27,12 @@ import static net.kyori.adventure.text.Component.translatable;
 @Singleton
 public class FlyCommand extends AbstractCommand {
 
+    private final Plugin plugin;
+
     @Inject
-    public FlyCommand() {
+    public FlyCommand(Plugin plugin) {
         super("fly");
+        this.plugin = plugin;
     }
 
     @Override
@@ -57,21 +61,25 @@ public class FlyCommand extends AbstractCommand {
 
     public int set(CommandSender sender, Collection<Player> targets, TriState state) {
         for (Player target : targets) {
-            boolean newState = state.toBooleanOrElseGet(() -> !target.getAllowFlight());
-            if (target.getAllowFlight() == newState) {
-                sender.sendMessage(translatable("cu.command.fly.already-set",
-                        target.teamDisplayName(), text(newState)));
-                continue;
-            }
-
-            target.setAllowFlight(newState);
-            sender.sendMessage(translatable("cu.command.fly.success",
-                    target.teamDisplayName(), text(newState)));
-
-            if (newState && !target.isOnGround()) {
-                target.setFlying(true);
-            }
+            target.getScheduler().run(this.plugin, task -> this.set0(sender, target, state), null);
         }
         return targets.size();
+    }
+
+    private void set0(CommandSender sender, Player target, TriState state) {
+        boolean newState = state.toBooleanOrElseGet(() -> !target.getAllowFlight());
+        if (target.getAllowFlight() == newState) {
+            sender.sendMessage(translatable("cu.command.fly.already-set",
+                    target.teamDisplayName(), text(newState)));
+            return;
+        }
+
+        target.setAllowFlight(newState);
+        sender.sendMessage(translatable("cu.command.fly.success",
+                target.teamDisplayName(), text(newState)));
+
+        if (newState && !target.isOnGround()) {
+            target.setFlying(true);
+        }
     }
 }

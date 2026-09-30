@@ -55,4 +55,5 @@ bukkit {
     authors = listOf("booky10")
     website = "https://github.com/CloudCraftProjects/CloudUtilities"
     depend = listOf("CloudCore")
+    foliaSupported = true
 }

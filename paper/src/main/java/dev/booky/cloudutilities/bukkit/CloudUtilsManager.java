@@ -27,20 +27,28 @@ public class CloudUtilsManager {
     }
 
     public void reloadConfig() {
-        this.config = this.loadConfig();
+        synchronized (this.configPath) {
+            this.config = this.loadConfig();
+        }
     }
 
     public void updateConfig(Consumer<CloudUtilsConfig> updater) {
-        updater.accept(this.config);
-        this.saveConfig();
+        synchronized (this.configPath) {
+            updater.accept(this.config);
+            this.saveConfig();
+        }
     }
 
     public void saveConfig() {
-        CONFIGURATE_LOADER.saveObject(this.configPath, this.config);
+        synchronized (this.configPath) {
+            CONFIGURATE_LOADER.saveObject(this.configPath, this.config);
+        }
     }
 
     private CloudUtilsConfig loadConfig() {
-        return CONFIGURATE_LOADER.loadObject(this.configPath, CloudUtilsConfig.class);
+        synchronized (this.configPath) {
+            return CONFIGURATE_LOADER.loadObject(this.configPath, CloudUtilsConfig.class);
+        }
     }
 
     public CloudUtilsConfig getConfig() {

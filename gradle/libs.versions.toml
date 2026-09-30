@@ -9,7 +9,7 @@ publishing = "1.0.0"
 
 # common
 cloudcore = "1.1.1-SNAPSHOT"
-bstats = "3.0.2"
+bstats = "3.1.0"
 
 # paper
 paper = "1.21.9-R0.1-SNAPSHOT"
